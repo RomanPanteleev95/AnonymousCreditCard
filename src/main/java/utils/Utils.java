@@ -1,40 +1,79 @@
 package utils;
 
-import com.sun.xml.internal.bind.api.impl.NameConverter;
-import entities.Bank;
 import entities.Customer;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import entities.DoubleBlock;
+import entities.InnerBlock;
 import entities.Intermediary;
+import entities.banks.Bank;
+import entities.banks.CreditCardBank;
+import entities.banks.DepositBank;
 
 public class Utils {
-    public static void getDoubleBox(Bank bank, Customer customer) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException {
-        Cipher cipherCustomerBill = Cipher.getInstance("AES");
-        cipherCustomerBill.init(Cipher.ENCRYPT_MODE, bank.getKey());
-        byte[] blockWithCustomerBill = cipherCustomerBill.doFinal(customer.getBillId().getBytes());
-        logByte("Inner box has been created", blockWithCustomerBill);
-
-        Cipher cipherMessageWithBox = Cipher.getInstance("AES");
-        cipherMessageWithBox.init(Cipher.ENCRYPT_MODE, Intermediary.getIntermediarySecretKey());
-        byte[] doubleBox = cipherMessageWithBox.doFinal(blockWithCustomerBill);
-        logByte("Double box has been created", doubleBox);
-
+    public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
+        String encryptBanckId = encryptString(bank.getId(), intermediaryKey);
+        String encryptInnerBox = encryptString(innerBlock.getEncryptInformation(), intermediaryKey);
+        innerBlock.setEncryptInformation(encryptBanckId);
+        return new DoubleBlock(encryptBanckId, innerBlock);
     }
 
-    private static void logByte(String message, byte[] bytes) throws IOException {
-       String file = "double_box_logs.txt";
-        Files.write(Paths.get(file), message.getBytes(), StandardOpenOption.APPEND);
-        Files.write(Paths.get(file), "\n".getBytes(), StandardOpenOption.APPEND);
-        Files.write(Paths.get(file), bytes, StandardOpenOption.APPEND);
-        Files.write(Paths.get(file), "\n".getBytes(), StandardOpenOption.APPEND);
+    public static InnerBlock getInnerBlock(String bankPrivateKey, String customerBillId){
+        return new InnerBlock(encryptString(bankPrivateKey, customerBillId));
     }
+
+    private static String encryptString(String bankPrivateKey, String customerBillId){
+        char[] inf = customerBillId.toCharArray();
+        for (int i = 0; i < Math.min(bankPrivateKey.length(), customerBillId.length()); i++){
+            inf[i] = (char) (customerBillId.charAt(i) + bankPrivateKey.charAt(i));
+        }
+
+        return new String(inf);
+    }
+
+    private static String decryptString(String bankPrivateKey, String customerBillId){
+        char[] inf = customerBillId.toCharArray();
+        for (int i = 0; i < Math.min(bankPrivateKey.length(), customerBillId.length()); i++){
+            inf[i] = (char) (customerBillId.charAt(i) - bankPrivateKey.charAt(i));
+        }
+
+        return new String(inf);
+    }
+
+    public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank){
+        String billIdInCreditCardCardBank = "billIdInCreditCardCardBank"; //random
+        String billIdInCreditDepositBank = "billIdInCreditDepositBank"; //random
+
+        customer.setBillIdInCreditCardBank(billIdInCreditCardCardBank);
+        customer.setBillIdInDepositBank(billIdInCreditDepositBank);
+
+
+        InnerBlock innerBlockForCreditBank = getInnerBlock(creditCardBank.getPrivateKey(), billIdInCreditCardCardBank);
+        InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), billIdInCreditDepositBank);
+
+        Intermediary intermediary = Intermediary.getIntermediary();
+        DoubleBlock doubleBlockForCreditBanck = (DoubleBlock) getDLB(creditCardBank, customer.getId(), innerBlockForCreditBank, intermediary.getPrivateKey());
+        DoubleBlock doubleBlockForDepositBanck = (DoubleBlock) getDLB(depositBank, customer.getId(), innerBlockForDepositBanck, intermediary.getPrivateKey());
+
+        intermediary.addBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
+        intermediary.addBankDoubleBlock(depositBank, doubleBlockForDepositBanck);
+
+        if (creditCardBank instanceof CreditCardBank){
+            CreditCardBank cardBank = (CreditCardBank) creditCardBank;
+            cardBank.addDepositBanckDoubleBlock(depositBank, doubleBlockForDepositBanck);
+        }
+
+        if (depositBank instanceof DepositBank){
+            DepositBank depBanck = (DepositBank) depositBank;
+            depBanck.addCreditBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
+        }
+    }
+
+    public static void registrationBank(Bank bank){
+        String bankPrivateKey = "banckPrivateKey";
+        bank.setPrivateKey(bankPrivateKey);
+        String sharedKeyWithIntermediary = "sharedKeyWithIntermediary";
+        Intermediary intermediary = Intermediary.getIntermediary();
+        intermediary.addBanksSharedKey(bank, sharedKeyWithIntermediary);
+        bank.setSharedKeyWithIntermediary(sharedKeyWithIntermediary);
+    }
+
 }

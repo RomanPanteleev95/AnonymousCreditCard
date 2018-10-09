@@ -1,18 +1,45 @@
 package entities;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
+import entities.banks.Bank;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class Intermediary {
-    private SecretKey privateKey;
-    private Map<Integer, String> banksKey;
-    private Map<Integer, DoubleBlock> doubleBlocks;
+    private String privateKey = "intermediaryPrivateKey";
+    private Map<String, String> banksKey = new HashMap<>(); //id банка -> общий ключ с банком
+    private Map<String, DoubleBlock> doubleBlocks = new HashMap<>();
 
-    public static SecretKey getIntermediarySecretKey() throws NoSuchAlgorithmException {
-        KeyGenerator kgen = KeyGenerator.getInstance("AES");
-        kgen.init(128);
-        return kgen.generateKey();
+    private static Intermediary intermediary;
+
+    private Intermediary(){
+
+    }
+
+    public static Intermediary getIntermediary(){
+        if (intermediary == null){
+            intermediary = new Intermediary();
+        }
+        return intermediary;
+    }
+
+    public void addBankDoubleBlock(Bank bank, DoubleBlock doubleBlock){
+        doubleBlocks.put(bank.getId(), doubleBlock);
+    }
+
+    public void addBanksSharedKey(Bank bank, String sharedKey){
+        banksKey.put(bank.getId(), sharedKey);
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public String getSharedKey(String banckId){
+        return banksKey.get(banckId);
+    }
+
+    public DoubleBlock getDoubleBlock(String banckId){
+        return doubleBlocks.get(banckId);
     }
 }

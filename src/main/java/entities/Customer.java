@@ -1,27 +1,53 @@
 package entities;
 
 public class Customer {
-    private int id;
-    private String billId;
+    private String id;
+    private String billIdInDepositBank;
+    private String billIdInCreditCardBank;
+    private String secretKeySharedWithDepositBank;
+    private String secretKeySharedWithCreditCardBank;
 
-    public Customer(int id, String billId) {
+    public Customer(String id) {
         this.id = id;
-        this.billId = billId;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getBillId() {
-        return billId;
+    public String getBillIdInDepositBank() {
+        return billIdInDepositBank;
     }
 
-    public void setBillId(String billId) {
-        this.billId = billId;
+    public void setBillIdInDepositBank(String billIdInDepositBank) {
+        this.billIdInDepositBank = billIdInDepositBank;
+    }
+
+    public String getBillIdInCreditCardBank() {
+        return billIdInCreditCardBank;
+    }
+
+    public void setBillIdInCreditCardBank(String billIdInCreditCardBank) {
+        this.billIdInCreditCardBank = billIdInCreditCardBank;
+    }
+
+    public String getSecretKeySharedWithDepositBank() {
+        return secretKeySharedWithDepositBank;
+    }
+
+    public void setSecretKeySharedWithDepositBank(String secretKeySharedWithDepositBank) {
+        this.secretKeySharedWithDepositBank = secretKeySharedWithDepositBank;
+    }
+
+    public String getSecretKeySharedWithCreditCardBank() {
+        return secretKeySharedWithCreditCardBank;
+    }
+
+    public void setSecretKeySharedWithCreditCardBank(String secretKeySharedWithCreditCardBank) {
+        this.secretKeySharedWithCreditCardBank = secretKeySharedWithCreditCardBank;
     }
 }
