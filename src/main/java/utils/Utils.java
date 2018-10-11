@@ -12,7 +12,7 @@ public class Utils {
     public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
         String encryptBanckId = encryptString(bank.getId(), intermediaryKey);
         String encryptInnerBox = encryptString(innerBlock.getEncryptInformation(), intermediaryKey);
-        innerBlock.setEncryptInformation(encryptBanckId);
+        innerBlock.setEncryptInformation(encryptInnerBox);
         return new DoubleBlock(encryptBanckId, innerBlock);
     }
 
@@ -20,7 +20,7 @@ public class Utils {
         return new InnerBlock(encryptString(bankPrivateKey, customerBillId));
     }
 
-    private static String encryptString(String bankPrivateKey, String customerBillId){
+    public static String encryptString(String bankPrivateKey, String customerBillId){
         char[] inf = customerBillId.toCharArray();
         for (int i = 0; i < Math.min(bankPrivateKey.length(), customerBillId.length()); i++){
             inf[i] = (char) (customerBillId.charAt(i) + bankPrivateKey.charAt(i));
@@ -29,7 +29,7 @@ public class Utils {
         return new String(inf);
     }
 
-    private static String decryptString(String bankPrivateKey, String customerBillId){
+    public static String decryptString(String bankPrivateKey, String customerBillId){
         char[] inf = customerBillId.toCharArray();
         for (int i = 0; i < Math.min(bankPrivateKey.length(), customerBillId.length()); i++){
             inf[i] = (char) (customerBillId.charAt(i) - bankPrivateKey.charAt(i));
@@ -41,9 +41,15 @@ public class Utils {
     public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank){
         String billIdInCreditCardCardBank = "billIdInCreditCardCardBank"; //random
         String billIdInCreditDepositBank = "billIdInCreditDepositBank"; //random
+        String keySharedWithCreditBank = "keySharedWithCreditBank"; //random
+        String keySharedWithDepositBank = "keySharedWithDepositBank"; //random
+
 
         customer.setBillIdInCreditCardBank(billIdInCreditCardCardBank);
         customer.setBillIdInDepositBank(billIdInCreditDepositBank);
+        customer.setSecretKeySharedWithCreditCardBank(keySharedWithCreditBank);
+        customer.setSecretKeySharedWithDepositBank(keySharedWithDepositBank);
+
 
 
         InnerBlock innerBlockForCreditBank = getInnerBlock(creditCardBank.getPrivateKey(), billIdInCreditCardCardBank);
@@ -59,12 +65,18 @@ public class Utils {
         if (creditCardBank instanceof CreditCardBank){
             CreditCardBank cardBank = (CreditCardBank) creditCardBank;
             cardBank.addDepositBanckDoubleBlock(depositBank, doubleBlockForDepositBanck);
+            cardBank.addCustomerBill(customer);
+            cardBank.addSharedKey(customer);
         }
 
         if (depositBank instanceof DepositBank){
             DepositBank depBanck = (DepositBank) depositBank;
             depBanck.addCreditBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
+            depBanck.addCustomerBill(customer);
+            depBanck.addSharedKey(customer);
         }
+
+
     }
 
     public static void registrationBank(Bank bank){

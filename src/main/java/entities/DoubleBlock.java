@@ -1,5 +1,7 @@
 package entities;
 
+import java.util.Objects;
+
 public class DoubleBlock{
     private String bankId;
     private InnerBlock innerBlock;
@@ -23,5 +25,19 @@ public class DoubleBlock{
 
     public void setInnerBlock(InnerBlock innerBlock) {
         this.innerBlock = innerBlock;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DoubleBlock that = (DoubleBlock) o;
+        return Objects.equals(bankId, that.bankId) &&
+                Objects.equals(innerBlock, that.innerBlock);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bankId, innerBlock);
     }
 }

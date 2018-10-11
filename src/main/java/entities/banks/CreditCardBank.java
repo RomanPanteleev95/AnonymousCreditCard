@@ -1,5 +1,6 @@
 package entities.banks;
 
+import entities.Customer;
 import entities.DoubleBlock;
 
 import java.util.HashMap;
@@ -14,5 +15,13 @@ public class CreditCardBank extends Bank{
 
     public void addDepositBanckDoubleBlock(Bank bank, DoubleBlock doubleBlock){
         customerBlockInDepositBank.put(bank.getId(), doubleBlock);
+    }
+
+    public void addCustomerBill(Customer customer){
+        customersBill.put(customer.getId(), customer.getBillIdInCreditCardBank());
+    }
+
+    public void addSharedKey(Customer customer){
+        sharedCustomerKey.put(customer.getId(), customer.getSecretKeySharedWithCreditCardBank());
     }
 }

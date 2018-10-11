@@ -42,4 +42,13 @@ public class Intermediary {
     public DoubleBlock getDoubleBlock(String banckId){
         return doubleBlocks.get(banckId);
     }
+
+    public String getSharedKeyByDoubleBlock(DoubleBlock doubleBlock){
+        for (String key : doubleBlocks.keySet()){
+            if (doubleBlock.equals(doubleBlocks.get(key))){
+                return key;
+            }
+        }
+        return null;
+    }
 }

@@ -11,6 +11,7 @@ public abstract class Bank {
     protected String privateKey;
     protected String sharedKeyWithIntermediary;
     protected Map<String, String> customersBill = new HashMap<>();
+    protected Map<String, String> sharedCustomerKey = new HashMap<>();
 
     public String encryptInnerBlock(InnerBlock innerBlock){
         return null;
@@ -44,7 +45,5 @@ public abstract class Bank {
         this.sharedKeyWithIntermediary = sharedKeyWithIntermediary;
     }
 
-    public void addCustomerBill(Customer customer){
 
-    }
 }

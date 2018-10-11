@@ -1,6 +1,7 @@
 package entities;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class InnerBlock {
     private String encryptInformation;
@@ -15,5 +16,18 @@ public class InnerBlock {
 
     public void setEncryptInformation(String encryptInformation) {
         this.encryptInformation = encryptInformation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InnerBlock that = (InnerBlock) o;
+        return Objects.equals(encryptInformation, that.encryptInformation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(encryptInformation);
     }
 }
