@@ -1,6 +1,5 @@
-package entities;
+package entities.blocks;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 public class InnerBlock {

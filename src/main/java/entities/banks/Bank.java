@@ -1,7 +1,6 @@
 package entities.banks;
 
-import entities.Customer;
-import entities.InnerBlock;
+import entities.blocks.InnerBlock;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,8 +1,9 @@
 package utils;
 
 import entities.Customer;
-import entities.DoubleBlock;
-import entities.InnerBlock;
+import entities.Location;
+import entities.blocks.DoubleBlock;
+import entities.blocks.InnerBlock;
 import entities.Intermediary;
 import entities.banks.Bank;
 import entities.banks.CreditCardBank;
@@ -17,22 +18,22 @@ public class Utils {
     }
 
     public static InnerBlock getInnerBlock(String bankPrivateKey, String customerBillId){
-        return new InnerBlock(encryptString(bankPrivateKey, customerBillId));
+        return new InnerBlock(encryptString(customerBillId, bankPrivateKey));
     }
 
-    public static String encryptString(String bankPrivateKey, String customerBillId){
-        char[] inf = customerBillId.toCharArray();
-        for (int i = 0; i < Math.min(bankPrivateKey.length(), customerBillId.length()); i++){
-            inf[i] = (char) (customerBillId.charAt(i) + bankPrivateKey.charAt(i));
+    public static String encryptString(String infotmation, String key){
+        char[] inf = infotmation.toCharArray();
+        for (int i = 0; i < Math.min(infotmation.length(), key.length()); i++){
+            inf[i] = (char) (infotmation.charAt(i) + key.charAt(i));
         }
 
         return new String(inf);
     }
 
-    public static String decryptString(String bankPrivateKey, String customerBillId){
-        char[] inf = customerBillId.toCharArray();
-        for (int i = 0; i < Math.min(bankPrivateKey.length(), customerBillId.length()); i++){
-            inf[i] = (char) (customerBillId.charAt(i) - bankPrivateKey.charAt(i));
+    public static String decryptString(String information, String key){
+        char[] inf = information.toCharArray();
+        for (int i = 0; i < Math.min(information.length(), key.length()); i++){
+            inf[i] = (char) (information.charAt(i) - key.charAt(i));
         }
 
         return new String(inf);
@@ -40,20 +41,20 @@ public class Utils {
 
     public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank){
         String billIdInCreditCardCardBank = "billIdInCreditCardCardBank"; //random
-        String billIdInCreditDepositBank = "billIdInCreditDepositBank"; //random
+        String billIdInDepositBank = "Alexei_Berezin"; //random
         String keySharedWithCreditBank = "keySharedWithCreditBank"; //random
         String keySharedWithDepositBank = "keySharedWithDepositBank"; //random
 
 
         customer.setBillIdInCreditCardBank(billIdInCreditCardCardBank);
-        customer.setBillIdInDepositBank(billIdInCreditDepositBank);
+        customer.setBillIdInDepositBank(billIdInDepositBank);
         customer.setSecretKeySharedWithCreditCardBank(keySharedWithCreditBank);
         customer.setSecretKeySharedWithDepositBank(keySharedWithDepositBank);
 
 
 
         InnerBlock innerBlockForCreditBank = getInnerBlock(creditCardBank.getPrivateKey(), billIdInCreditCardCardBank);
-        InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), billIdInCreditDepositBank);
+        InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), billIdInDepositBank);
 
         Intermediary intermediary = Intermediary.getIntermediary();
         DoubleBlock doubleBlockForCreditBanck = (DoubleBlock) getDLB(creditCardBank, customer.getId(), innerBlockForCreditBank, intermediary.getPrivateKey());
@@ -86,6 +87,28 @@ public class Utils {
         Intermediary intermediary = Intermediary.getIntermediary();
         intermediary.addBanksSharedKey(bank, sharedKeyWithIntermediary);
         bank.setSharedKeyWithIntermediary(sharedKeyWithIntermediary);
+    }
+
+    public static void registrationLocation(Location location){
+        location.setLocationId("locationId");
+        String sharedKeyLocationWithIntermediary = "sharedKeyLocationWithIntermediary";
+        Intermediary intermediary = Intermediary.getIntermediary();
+        location.setSharedKeyWithIntermediary(sharedKeyLocationWithIntermediary);
+        intermediary.addLocationSharedKey(location);
+    }
+
+    public static DoubleBlock encryptDoubleBlock(DoubleBlock doubleBlock, String key){
+        String encryptionBankIdFromDoubleBlock = Utils.encryptString(doubleBlock.getBankId(), key);
+        InnerBlock innerBlock = doubleBlock.getInnerBlock();
+        innerBlock.setEncryptInformation(Utils.encryptString( innerBlock.getEncryptInformation(), key));
+        return new DoubleBlock(encryptionBankIdFromDoubleBlock, innerBlock);
+    }
+
+    public static DoubleBlock decryptDoubleBlock(DoubleBlock doubleBlock, String key){
+        String decriptionBankIdFromDoubleBlock = Utils.decryptString(doubleBlock.getBankId(), key);
+        InnerBlock innerBlock = doubleBlock.getInnerBlock();
+        innerBlock.setEncryptInformation(Utils.decryptString(innerBlock.getEncryptInformation(), key));
+        return new DoubleBlock(decriptionBankIdFromDoubleBlock, innerBlock);
     }
 
 }

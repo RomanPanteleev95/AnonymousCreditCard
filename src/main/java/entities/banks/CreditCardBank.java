@@ -1,7 +1,7 @@
 package entities.banks;
 
 import entities.Customer;
-import entities.DoubleBlock;
+import entities.blocks.DoubleBlock;
 
 import java.util.HashMap;
 import java.util.Map;

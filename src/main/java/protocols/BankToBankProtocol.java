@@ -1,60 +1,55 @@
 package protocols;
 
-import entities.DoubleBlock;
-import entities.InnerBlock;
+import entities.blocks.DoubleBlock;
+import entities.blocks.InnerBlock;
 import entities.Intermediary;
 import entities.Message;
 import entities.banks.Bank;
 import utils.Utils;
 
 public class BankToBankProtocol {
-    private static final Intermediary intermediary = Intermediary.getIntermediary();
+    private static final Intermediary INTERMEDIARY = Intermediary.getIntermediary();
     private Bank sourceBank;
-    private Bank destinationBank;
+    private DoubleBlock destinationBankDoubleBlock;
     private Message message;
     private String messageHeader;
+    private Bank destinationBank;
 
-    public BankToBankProtocol(Bank sourceBank, Bank destinationBank, Message message) {
+    public BankToBankProtocol(Bank sourceBank, DoubleBlock destinationBankDoubleBlock, Message message, Bank destinationBank) {
         this.sourceBank = sourceBank;
-        this.destinationBank = destinationBank;
+        this.destinationBankDoubleBlock = destinationBankDoubleBlock;
         this.message = message;
         this.messageHeader = sourceBank.getId();
+        this.destinationBank = destinationBank;
     }
 
     public void runProtocol(){
 
         //encryption by source banck
-        DoubleBlock destinationDoubleBlock = intermediary.getDoubleBlock(destinationBank.getId());
         message.setBody(Utils.encryptString(message.getBody(), sourceBank.getSharedKeyWithIntermediary()));
-        DoubleBlock encryptionDoubleBlock = encryptDoubleBlock(destinationDoubleBlock);
+        DoubleBlock encryptionDoubleBlock = Utils.encryptDoubleBlock(destinationBankDoubleBlock, sourceBank.getSharedKeyWithIntermediary());
 
         //decryptionByIntermediary
-        String sharedKeyWithSourceBank = intermediary.getSharedKey(messageHeader);
-        DoubleBlock decryptionDoubleBlock = decryptDoubleBlock(encryptionDoubleBlock, sharedKeyWithSourceBank);
+        String sharedKeyWithSourceBank = INTERMEDIARY.getBankSharedKey(messageHeader);
+        DoubleBlock decryptionDoubleBlock = Utils.decryptDoubleBlock(encryptionDoubleBlock, sharedKeyWithSourceBank);
         message.setBody(Utils.decryptString(message.getBody(),sharedKeyWithSourceBank));
-        String decryptionDestanationBankId = Utils.decryptString(decryptionDoubleBlock.getBankId(), intermediary.getPrivateKey());
+        String decryptionDestanationBankId = Utils.decryptString(decryptionDoubleBlock.getBankId(), INTERMEDIARY.getPrivateKey());
         InnerBlock innerBlock = decryptionDoubleBlock.getInnerBlock();
-        innerBlock.setEncryptInformation(Utils.decryptString(innerBlock.getEncryptInformation(), intermediary.getPrivateKey()));
-        String sharedKeyWithDestinationBank = intermediary.getSharedKey(decryptionDestanationBankId);
+        InnerBlock tmpInnerBlock = new InnerBlock(Utils.decryptString(innerBlock.getEncryptInformation(), INTERMEDIARY.getPrivateKey()));
+
+
+
+        String sharedKeyWithDestinationBank = INTERMEDIARY.getBankSharedKey(decryptionDestanationBankId);
         message.setBody(Utils.encryptString(message.getBody(), sharedKeyWithDestinationBank));
-        innerBlock.setEncryptInformation(Utils.encryptString(innerBlock.getEncryptInformation(), sharedKeyWithDestinationBank));
+        tmpInnerBlock.setEncryptInformation(Utils.encryptString(tmpInnerBlock.getEncryptInformation(), sharedKeyWithDestinationBank));
 
+        message.setBody(Utils.decryptString(message.getBody(), sharedKeyWithDestinationBank));
+        tmpInnerBlock.setEncryptInformation(Utils.decryptString(tmpInnerBlock.getEncryptInformation(), sharedKeyWithDestinationBank));
+        tmpInnerBlock.setEncryptInformation(Utils.decryptString(tmpInnerBlock.getEncryptInformation(), destinationBank.getPrivateKey()));
 
-
+        System.out.println(message.getBody() + "$ на счет клиента " + tmpInnerBlock.getEncryptInformation());
     }
 
 
-    private DoubleBlock encryptDoubleBlock(DoubleBlock doubleBlock){
-        String encryptionBankIdFromDoubleBlock = Utils.encryptString(sourceBank.getSharedKeyWithIntermediary(), doubleBlock.getBankId());
-        InnerBlock innerBlock = doubleBlock.getInnerBlock();
-        innerBlock.setEncryptInformation(Utils.encryptString(sourceBank.getSharedKeyWithIntermediary(), innerBlock.getEncryptInformation()));
-        return new DoubleBlock(encryptionBankIdFromDoubleBlock, innerBlock);
-    }
 
-    private DoubleBlock decryptDoubleBlock(DoubleBlock doubleBlock, String sharedKeyWithSourceBank){
-        String decriptionBankIdFromDoubleBlock = Utils.decryptString(sharedKeyWithSourceBank, doubleBlock.getBankId());
-        InnerBlock innerBlock = doubleBlock.getInnerBlock();
-        innerBlock.setEncryptInformation(Utils.decryptString(sharedKeyWithSourceBank, innerBlock.getEncryptInformation()));
-        return new DoubleBlock(decriptionBankIdFromDoubleBlock, innerBlock);
-    }
 }
