@@ -1,5 +1,6 @@
 package utils;
 
+import db.DataBaseAnalog;
 import entities.Customer;
 import entities.Location;
 import entities.blocks.DoubleBlock;
@@ -10,6 +11,7 @@ import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
 
 public class Utils {
+    private static final DataBaseAnalog DATA_BASE_ANALOG = DataBaseAnalog.getDataBaseAnalog();
     public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
         String encryptBanckId = encryptString(bank.getId(), intermediaryKey);
         String encryptInnerBox = encryptString(innerBlock.getEncryptInformation(), intermediaryKey);
@@ -39,9 +41,22 @@ public class Utils {
         return new String(inf);
     }
 
+    public static void createCustomer(String customerName){
+        DATA_BASE_ANALOG.addCustomer(new Customer(customerName));
+    }
+
+    public static void createCreditCardBank(String name){
+        DATA_BASE_ANALOG.addCreditBank(new CreditCardBank(name));
+    }
+
+    public static void createDepositBank(String name){
+        DATA_BASE_ANALOG.addDepositBank(new DepositBank(name));
+    }
+
     public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank){
+        DataBaseAnalog dataBaseAnalog = DataBaseAnalog.getDataBaseAnalog();
         String billIdInCreditCardCardBank = "billIdInCreditCardCardBank"; //random
-        String billIdInDepositBank = "Alexei_Berezin"; //random
+        String billIdInDepositBank = "billIdInDepositBank"; //random
         String keySharedWithCreditBank = "keySharedWithCreditBank"; //random
         String keySharedWithDepositBank = "keySharedWithDepositBank"; //random
 
@@ -75,18 +90,27 @@ public class Utils {
             depBanck.addCreditBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
             depBanck.addCustomerBill(customer);
             depBanck.addSharedKey(customer);
+            depBanck.addNewBill(customer);
         }
 
+       dataBaseAnalog.addCustomer(customer);
 
     }
 
     public static void registrationBank(Bank bank){
+        DataBaseAnalog dataBaseAnalog = DataBaseAnalog.getDataBaseAnalog();
         String bankPrivateKey = "banckPrivateKey";
         bank.setPrivateKey(bankPrivateKey);
         String sharedKeyWithIntermediary = "sharedKeyWithIntermediary";
         Intermediary intermediary = Intermediary.getIntermediary();
         intermediary.addBanksSharedKey(bank, sharedKeyWithIntermediary);
         bank.setSharedKeyWithIntermediary(sharedKeyWithIntermediary);
+        if (bank instanceof CreditCardBank){
+            dataBaseAnalog.addCreditBank(bank);
+        }
+        if (bank instanceof DepositBank){
+            dataBaseAnalog.addDepositBank(bank);
+        }
     }
 
     public static void registrationLocation(Location location){

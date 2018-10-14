@@ -1,5 +1,7 @@
 package protocols;
 
+import entities.Customer;
+import entities.banks.DepositBank;
 import entities.blocks.DoubleBlock;
 import entities.blocks.InnerBlock;
 import entities.Intermediary;
@@ -14,6 +16,7 @@ public class BankToBankProtocol {
     private Message message;
     private String messageHeader;
     private Bank destinationBank;
+    private Customer customer;
 
     public BankToBankProtocol(Bank sourceBank, DoubleBlock destinationBankDoubleBlock, Message message, Bank destinationBank) {
         this.sourceBank = sourceBank;
@@ -21,6 +24,17 @@ public class BankToBankProtocol {
         this.message = message;
         this.messageHeader = sourceBank.getId();
         this.destinationBank = destinationBank;
+    }
+
+    public BankToBankProtocol(Customer customer, Bank sourceBank, Bank destinationBank, Message message){
+        //TODO: add validation
+        DoubleBlock destinationDoubleBlock = INTERMEDIARY.getDoubleBlock(destinationBank.getId());
+        this.customer = customer;
+        this.sourceBank = sourceBank;
+        this.destinationBank = destinationBank;
+        this.destinationBankDoubleBlock = destinationDoubleBlock;
+        this.message = message;
+        this.messageHeader = sourceBank.getId();
     }
 
     public void runProtocol(){
@@ -46,10 +60,10 @@ public class BankToBankProtocol {
         message.setBody(Utils.decryptString(message.getBody(), sharedKeyWithDestinationBank));
         tmpInnerBlock.setEncryptInformation(Utils.decryptString(tmpInnerBlock.getEncryptInformation(), sharedKeyWithDestinationBank));
         tmpInnerBlock.setEncryptInformation(Utils.decryptString(tmpInnerBlock.getEncryptInformation(), destinationBank.getPrivateKey()));
+        DepositBank depositBank = (DepositBank) destinationBank;
+        depositBank.addMoneyToBill(customer, message.getBody());
 
         System.out.println(message.getBody() + "$ на счет клиента " + tmpInnerBlock.getEncryptInformation());
     }
-
-
 
 }
