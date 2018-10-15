@@ -33,7 +33,6 @@ public class JavaFXTestRun extends Application {
     Scene customerOperationsScene;
 
     DataBaseAnalog dataBaseAnalog = DataBaseAnalog.getDataBaseAnalog();
-    Intermediary intermediary = Intermediary.getIntermediary();
 
     public static void main(String[] args) {
         launch(args);
@@ -53,15 +52,13 @@ public class JavaFXTestRun extends Application {
         registrationCustomerScene = registrationCustomer();
         customerOperationsScene = customerOperations();
 
-
-
         window.setScene(menuScene);
         window.show();
 
     }
 
     public Scene getMenuScene(){
-        Label menu = new Label("Menu");
+        Label menuLable = new Label("Menu");
 
         Button createCustomerButton = new Button("Create customer");
         Button createDepositBankButton = new Button("Create deposit bank");
@@ -72,6 +69,7 @@ public class JavaFXTestRun extends Application {
         Button customerOperations = new Button("Customer operations");
         Button showLogs = new Button("Show logs");
 
+
         createCustomerButton.setOnAction(e -> window.setScene(createCustomerScene));
         createDepositBankButton.setOnAction(event -> window.setScene(createDepositBankScene));
         createCreditCardBankButton.setOnAction(event -> window.setScene(createCreditBankScene));
@@ -81,10 +79,11 @@ public class JavaFXTestRun extends Application {
         customerOperations.setOnAction(event -> window.setScene(customerOperationsScene));
         showLogs.setOnAction(event -> window.setScene(this.showLogs));
 
-        StackPane layout1 = new StackPane();
-        layout1.getChildren().addAll(menu, createCustomerButton, createDepositBankButton, createCreditCardBankButton,
+        StackPane menuStackPane = new StackPane();
+        menuStackPane.getChildren().addAll(menuLable, createCustomerButton, createDepositBankButton, createCreditCardBankButton,
                 registrationDepositBankButton, registrationCreditCardBankButton, registrationCustomerButton, customerOperations, showLogs);
-        StackPane.setMargin(menu, new Insets(5, 50, 380, 50));
+
+        StackPane.setMargin(menuLable, new Insets(5, 50, 380, 50));
         StackPane.setMargin(createCustomerButton, new Insets(40, 50, 360, 50));
         StackPane.setMargin(createDepositBankButton, new Insets(80, 50, 320, 50));
         StackPane.setMargin(createCreditCardBankButton, new Insets(120, 50, 280, 50));
@@ -94,7 +93,7 @@ public class JavaFXTestRun extends Application {
         StackPane.setMargin(customerOperations, new Insets(280, 50, 120, 50));
         StackPane.setMargin(showLogs, new Insets(380, 10, 20, 210));
 
-        return new Scene(layout1, 300, 400);
+        return new Scene(menuStackPane, 300, 400);
     }
 
     public Scene showLogs(){
@@ -188,6 +187,7 @@ public class JavaFXTestRun extends Application {
 
         StackPane layout1 = new StackPane();
         layout1.getChildren().addAll(allCustomers, outputArea, showCustomers, menuButton, showDepositBanks, showCreditBanks, showCustomerBill);
+
         StackPane.setMargin(allCustomers, new Insets(5, 50, 280, 50));
         StackPane.setMargin(outputArea, new Insets(10, 10, 150, 150));
         StackPane.setMargin(showCustomers, new Insets(10, 460, 550, 10));
@@ -202,10 +202,10 @@ public class JavaFXTestRun extends Application {
     public Scene createCustomer(){
         Label nameLabel = new Label("Customer name");
         TextArea nameInput = new TextArea();
-        Button button2 = new Button("Create and go back");
+        Button createButton = new Button("Create and go back");
         Button menuButton = new Button("Menu");
 
-        button2.setOnAction(event -> {
+        createButton.setOnAction(event -> {
             String customerName = nameInput.getText();
             Utils.createCustomer(customerName);
             nameInput.clear();
@@ -216,21 +216,23 @@ public class JavaFXTestRun extends Application {
             nameInput.clear();
         });
 
-        StackPane layout2 = new StackPane();
-        layout2.getChildren().addAll(nameLabel, nameInput, button2, menuButton);
+        StackPane createCustomerStackPane = new StackPane();
+        createCustomerStackPane.getChildren().addAll(nameLabel, nameInput, createButton, menuButton);
+
         StackPane.setMargin(nameLabel, new Insets(17, 50, 262, 50));
         StackPane.setMargin(nameInput, new Insets(50, 50, 230, 50));
-        StackPane.setMargin(button2, new Insets(80, 50, 120, 50));
+        StackPane.setMargin(createButton, new Insets(80, 50, 120, 50));
         StackPane.setMargin(menuButton, new Insets(270, 10, 10, 230));
-        return new Scene(layout2, 300, 300);
+
+        return new Scene(createCustomerStackPane, 300, 300);
     }
 
     public Scene createDepositBank(){
         Label nameLabel = new Label("Deposit bank name");
         TextArea nameInput = new TextArea();
-        Button button2 = new Button("Create and go back");
+        Button createDepositBunkButton = new Button("Create and go back");
         Button menuButton = new Button("Menu");
-        button2.setOnAction(event -> {
+        createDepositBunkButton.setOnAction(event -> {
             String depositBankName = nameInput.getText();
             Utils.createDepositBank(depositBankName);
             nameInput.clear();
@@ -242,10 +244,10 @@ public class JavaFXTestRun extends Application {
         });
 
         StackPane layout2 = new StackPane();
-        layout2.getChildren().addAll(nameLabel, nameInput, button2, menuButton);
+        layout2.getChildren().addAll(nameLabel, nameInput, createDepositBunkButton, menuButton);
         StackPane.setMargin(nameLabel, new Insets(17, 50, 262, 50));
         StackPane.setMargin(nameInput, new Insets(50, 50, 200, 50));
-        StackPane.setMargin(button2, new Insets(80, 50, 120, 50));
+        StackPane.setMargin(createDepositBunkButton, new Insets(80, 50, 120, 50));
         StackPane.setMargin(menuButton, new Insets(270, 10, 10, 230));
         return new Scene(layout2, 300, 300);
     }
@@ -253,9 +255,9 @@ public class JavaFXTestRun extends Application {
     public Scene createCrediBank(){
         Label nameLabel = new Label("Credit bank name");
         TextArea nameInput = new TextArea();
-        Button button2 = new Button("Create and go back");
+        Button createCreditBankButton = new Button("Create and go back");
         Button menuButton = new Button("Menu");
-        button2.setOnAction(event -> {
+        createCreditBankButton.setOnAction(event -> {
             String creditBankName = nameInput.getText();
             Utils.createCreditCardBank(creditBankName);
             nameInput.clear();
@@ -267,10 +269,10 @@ public class JavaFXTestRun extends Application {
         });
 
         StackPane layout2 = new StackPane();
-        layout2.getChildren().addAll(nameLabel, nameInput, button2, menuButton);
+        layout2.getChildren().addAll(nameLabel, nameInput, createCreditBankButton, menuButton);
         StackPane.setMargin(nameLabel, new Insets(17, 50, 262, 50));
         StackPane.setMargin(nameInput, new Insets(50, 50, 200, 50));
-        StackPane.setMargin(button2, new Insets(80, 50, 120, 50));
+        StackPane.setMargin(createCreditBankButton, new Insets(80, 50, 120, 50));
         StackPane.setMargin(menuButton, new Insets(270, 10, 10, 230));
         return new Scene(layout2, 300, 300);
     }
@@ -385,17 +387,17 @@ public class JavaFXTestRun extends Application {
             String creditBankName = creditBankNameInput.getText();
             String depositBankName = depositBankNameInput.getText();
             String message = moneyInput.getText();
-            Customer customer = dataBaseAnalog.getCustomer(customerName);
-            CreditCardBank creditCardBank = (CreditCardBank) dataBaseAnalog.getCreditCardBank(creditBankName);
-            DepositBank depositBank = (DepositBank) dataBaseAnalog.getDepositBank(depositBankName);
-            Message message1 = new Message(message);
-            BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(customer, creditCardBank, depositBank, message1);
+
+            BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(dataBaseAnalog.getCustomer(customerName), dataBaseAnalog.getCreditCardBank(creditBankName),
+                    dataBaseAnalog.getDepositBank(depositBankName), new Message(message));
             bankToBankProtocol.runProtocol();
+
             customerNameInput.clear();
             depositBankNameInput.clear();
             creditBankNameInput.clear();
             window.setScene(menuScene);
         });
+
         menuButton.setOnAction(event -> {
             window.setScene(menuScene);
             customerNameInput.clear();
@@ -418,24 +420,5 @@ public class JavaFXTestRun extends Application {
         StackPane.setMargin(menuButton, new Insets(270, 10, 10, 230));
         return new Scene(layout2, 300, 300);
     }
-
-    public Stage createDepositBankSelectWindow(){
-        Stage bankWindow = new Stage();
-        TextArea depositBankInput = new TextArea();
-        Button setDepositBankName = new Button("Select");
-        StackPane tmpLayout = new StackPane();
-
-        setDepositBankName.setOnAction(event -> {
-            bankWindow.close();
-        });
-
-        tmpLayout.getChildren().addAll(depositBankInput, setDepositBankName);
-        StackPane.setMargin(depositBankInput, new Insets(5, 5, 20, 5));
-        StackPane.setMargin(setDepositBankName, new Insets(25, 50, 45, 50));
-        Scene tpmScene = new Scene(tmpLayout, 150, 50);
-        bankWindow.setScene(tpmScene);
-        return bankWindow;
-    }
-
 
 }

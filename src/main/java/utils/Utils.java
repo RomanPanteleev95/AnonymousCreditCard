@@ -9,8 +9,10 @@ import entities.Intermediary;
 import entities.banks.Bank;
 import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
+import org.apache.log4j.Logger;
 
 public class Utils {
+    private static final Logger logger = Logger.getLogger(Utils.class);
     private static final DataBaseAnalog DATA_BASE_ANALOG = DataBaseAnalog.getDataBaseAnalog();
     public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
         String encryptBanckId = encryptString(bank.getId(), intermediaryKey);
@@ -43,6 +45,7 @@ public class Utils {
 
     public static void createCustomer(String customerName){
         DATA_BASE_ANALOG.addCustomer(new Customer(customerName));
+        logger.info("Customer was created: " +  customerName);
     }
 
     public static void createCreditCardBank(String name){
