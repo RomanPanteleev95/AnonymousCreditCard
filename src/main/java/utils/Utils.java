@@ -1,5 +1,6 @@
 package utils;
 
+import constants.Constant;
 import db.DataBaseAnalog;
 import entities.Customer;
 import entities.Location;
@@ -11,9 +12,19 @@ import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
 import org.apache.log4j.Logger;
 
+import java.sql.*;
+
 public class Utils {
-    private static final Logger logger = Logger.getLogger(Utils.class);
     private static final DataBaseAnalog DATA_BASE_ANALOG = DataBaseAnalog.getDataBaseAnalog();
+
+    private static Statement getStatement() throws ClassNotFoundException, SQLException {
+        Class.forName("org.postgresql.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:postgresql://ec2-54-217-236-201.eu-west-1.compute.amazonaws.com:5432" +
+                "/ddh2dcreu9it5p?sslfactory=org.postgresql.ssl.NonValidatingFactory&user=wqdmxutohfcxex&password=78b1c206c96557b79a4b3a0968eea4f4975f8f3462a95c255ae68a7e86c95a66&ssl=true");
+        return connection.createStatement();
+    }
+
+
     public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
         String encryptBanckId = encryptString(bank.getId(), intermediaryKey);
         String encryptInnerBox = encryptString(innerBlock.getEncryptInformation(), intermediaryKey);
@@ -45,15 +56,6 @@ public class Utils {
 
     public static void createCustomer(String customerName){
         DATA_BASE_ANALOG.addCustomer(new Customer(customerName));
-        logger.info("Customer was created: " +  customerName);
-    }
-
-    public static void createCreditCardBank(String name){
-        DATA_BASE_ANALOG.addCreditBank(new CreditCardBank(name));
-    }
-
-    public static void createDepositBank(String name){
-        DATA_BASE_ANALOG.addDepositBank(new DepositBank(name));
     }
 
     public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank){
@@ -100,19 +102,33 @@ public class Utils {
 
     }
 
-    public static void registrationBank(Bank bank){
-        DataBaseAnalog dataBaseAnalog = DataBaseAnalog.getDataBaseAnalog();
-        String bankPrivateKey = "banckPrivateKey";
-        bank.setPrivateKey(bankPrivateKey);
-        String sharedKeyWithIntermediary = "sharedKeyWithIntermediary";
-        Intermediary intermediary = Intermediary.getIntermediary();
-        intermediary.addBanksSharedKey(bank, sharedKeyWithIntermediary);
-        bank.setSharedKeyWithIntermediary(sharedKeyWithIntermediary);
-        if (bank instanceof CreditCardBank){
-            dataBaseAnalog.addCreditBank(bank);
-        }
-        if (bank instanceof DepositBank){
-            dataBaseAnalog.addDepositBank(bank);
+    public static void registrationBank() throws ClassNotFoundException, SQLException {
+        Statement statement = getStatement();
+        ResultSet rs = statement.executeQuery(Constant.SqlQuery.SELECT_ALL_BANKS);
+        while (rs.next()){
+            int bankId = rs.getInt(1);
+            String bankName = rs.getString(2);
+            String bankType = rs.getString(3);
+            String bankPrivateKey = rs.getString(4);
+            String bankKeySharedWithIntemediary = rs.getString(5);
+
+            if (bankType.equals("Deposit")){
+                DepositBank depositBank = new DepositBank(bankName);
+                depositBank.setPrivateKey(bankPrivateKey);
+                depositBank.setSharedKeyWithIntermediary(bankKeySharedWithIntemediary);
+                Intermediary intermediary = Intermediary.getIntermediary();
+                intermediary.addBanksSharedKey(depositBank, bankKeySharedWithIntemediary);
+                DATA_BASE_ANALOG.addDepositBank(depositBank);
+            }
+
+            if (bankType.equals("Credit")){
+                CreditCardBank creditCardBankBank = new CreditCardBank(bankName);
+                creditCardBankBank.setPrivateKey(bankPrivateKey);
+                creditCardBankBank.setSharedKeyWithIntermediary(bankKeySharedWithIntemediary);
+                Intermediary intermediary = Intermediary.getIntermediary();
+                intermediary.addBanksSharedKey(creditCardBankBank, bankKeySharedWithIntemediary);
+                DATA_BASE_ANALOG.addCreditBank(creditCardBankBank);
+            }
         }
     }
 

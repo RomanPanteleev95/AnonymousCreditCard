@@ -22,4 +22,8 @@ public interface Constant {
         String ENTER_BANK_NAME = "Введите название банка: ";
         String ENTER_SUM = "Введите сумму: ";
     }
+
+    interface SqlQuery{
+        String SELECT_ALL_BANKS = "select * from banks";
+    }
 }
