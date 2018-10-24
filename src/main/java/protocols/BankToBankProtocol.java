@@ -22,19 +22,19 @@ public class BankToBankProtocol {
         this.sourceBank = sourceBank;
         this.destinationBankDoubleBlock = destinationBankDoubleBlock;
         this.message = message;
-        this.messageHeader = sourceBank.getId();
+        this.messageHeader = sourceBank.getName();
         this.destinationBank = destinationBank;
     }
 
     public BankToBankProtocol(Customer customer, Bank sourceBank, Bank destinationBank, Message message){
         //TODO: add validation
-        DoubleBlock destinationDoubleBlock = INTERMEDIARY.getDoubleBlock(destinationBank.getId());
+        DoubleBlock destinationDoubleBlock = INTERMEDIARY.getDoubleBlock(destinationBank.getName());
         this.customer = customer;
         this.sourceBank = sourceBank;
         this.destinationBank = destinationBank;
         this.destinationBankDoubleBlock = destinationDoubleBlock;
         this.message = message;
-        this.messageHeader = sourceBank.getId();
+        this.messageHeader = sourceBank.getName();
     }
 
     public void runProtocol(){

@@ -3,9 +3,7 @@ package db;
 import entities.Customer;
 import entities.banks.Bank;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DataBaseAnalog {
@@ -27,15 +25,15 @@ public class DataBaseAnalog {
     }
 
     public void addDepositBank(Bank bank){
-        depositBanks.put(bank.getId(), bank);
+        depositBanks.put(bank.getName(), bank);
     }
 
     public void addCreditBank(Bank bank){
-        creditCradBanks.put(bank.getId(), bank);
+        creditCradBanks.put(bank.getName(), bank);
     }
 
     public void addCustomer(Customer customer){
-        customers.put(customer.getId(), customer);
+        customers.put(customer.getName(), customer);
     }
 
     public Bank getDepositBank(String depositBankId){

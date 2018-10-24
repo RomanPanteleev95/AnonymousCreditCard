@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Intermediary {
     private String privateKey = "intermediaryPrivateKey";
-    private Map<String, String> banksKey = new HashMap<>(); //id банка -> общий ключ с банком
+    private Map<String, String> banksKey = new HashMap<>(); //name банка -> общий ключ с банком
     private Map<String, DoubleBlock> doubleBlocks = new HashMap<>();
     private Map<String, String> locationKey = new HashMap<>();
 
@@ -26,11 +26,11 @@ public class Intermediary {
     }
 
     public void addBankDoubleBlock(Bank bank, DoubleBlock doubleBlock){
-        doubleBlocks.put(bank.getId(), doubleBlock);
+        doubleBlocks.put(bank.getName(), doubleBlock);
     }
 
     public void addBanksSharedKey(Bank bank, String sharedKey){
-        banksKey.put(bank.getId(), sharedKey);
+        banksKey.put(bank.getName(), sharedKey);
     }
 
     public String getPrivateKey() {
@@ -46,7 +46,7 @@ public class Intermediary {
     }
 
     public void addLocationSharedKey(Location location){
-        locationKey.put(location.getLocationId(), location.getSharedKeyWithIntermediary());
+        locationKey.put(location.getLocationName(), location.getSharedKeyWithIntermediary());
     }
 
     public DoubleBlock getDoubleBlock(String banckId){

@@ -1,15 +1,15 @@
 package entities;
 
 public class Location {
-    private String locationId;
+    private String locationName;
     private String sharedKeyWithIntermediary;
 
-    public String getLocationId() {
-        return locationId;
+    public String getLocationName() {
+        return locationName;
     }
 
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
     public String getSharedKeyWithIntermediary() {

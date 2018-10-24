@@ -1,23 +1,25 @@
 package entities;
 
 public class Customer {
-    private String id;
+    private String name;
     private String billIdInDepositBank;
     private String billIdInCreditCardBank;
     private String secretKeySharedWithDepositBank;
     private String secretKeySharedWithCreditCardBank;
 
-    public Customer(String id) {
-        this.id = id;
+    public Customer(String name) {
+        this.name = name;
     }
 
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
+
+
 
     public String getBillIdInDepositBank() {
         return billIdInDepositBank;

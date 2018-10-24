@@ -9,5 +9,8 @@
         <module name="AnonymousCreditCard" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="AnonymousCreditCard" target="8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

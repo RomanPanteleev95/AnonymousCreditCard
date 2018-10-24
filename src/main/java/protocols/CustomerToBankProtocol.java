@@ -28,12 +28,12 @@ public class CustomerToBankProtocol {
         message.setBody(Utils.encryptString(message.getBody(), customer.getSecretKeySharedWithDepositBank()));
 
         //market encrypt DB + message
-        DoubleBlock depositBankDoubleBlock = INTERMEDIARY.getDoubleBlock(depositBank.getId());
+        DoubleBlock depositBankDoubleBlock = INTERMEDIARY.getDoubleBlock(depositBank.getName());
         DoubleBlock encryptionDoubleBlock = Utils.encryptDoubleBlock(depositBankDoubleBlock, location.getSharedKeyWithIntermediary());
         message.setBody(Utils.encryptString(message.getBody(), location.getSharedKeyWithIntermediary()));
 
         //intermed decrypt DB + message
-        String sharedKeyWithLocation = INTERMEDIARY.getLocationSharedKey(location.getLocationId());
+        String sharedKeyWithLocation = INTERMEDIARY.getLocationSharedKey(location.getLocationName());
         message.setBody(Utils.decryptString(message.getBody(), sharedKeyWithLocation));
         DoubleBlock decriptionDoubleBlock = Utils.decryptDoubleBlock(encryptionDoubleBlock, sharedKeyWithLocation);
 

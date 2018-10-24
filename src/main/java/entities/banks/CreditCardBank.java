@@ -9,19 +9,19 @@ import java.util.Map;
 public class CreditCardBank extends Bank{
     private Map<String, DoubleBlock> customerBlockInDepositBank = new HashMap<>();
 
-    public CreditCardBank(String id) {
-        super(id);
+    public CreditCardBank(String name) {
+        super(name);
     }
 
     public void addDepositBanckDoubleBlock(Bank bank, DoubleBlock doubleBlock){
-        customerBlockInDepositBank.put(bank.getId(), doubleBlock);
+        customerBlockInDepositBank.put(bank.getName(), doubleBlock);
     }
 
     public void addCustomerBill(Customer customer){
-        customersBill.put(customer.getId(), customer.getBillIdInCreditCardBank());
+        customersBill.put(customer.getName(), customer.getBillIdInCreditCardBank());
     }
 
     public void addSharedKey(Customer customer){
-        sharedCustomerKey.put(customer.getId(), customer.getSecretKeySharedWithCreditCardBank());
+        sharedCustomerKey.put(customer.getName(), customer.getSecretKeySharedWithCreditCardBank());
     }
 }

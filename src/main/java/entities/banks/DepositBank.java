@@ -19,41 +19,41 @@ public class DepositBank extends Bank{
     /* map: locationId -> sharedKey */
     private Map<String, String> sharedLocationKey = new HashMap<>();
 
-    public DepositBank(String id) {
-        super(id);
+    public DepositBank(String name) {
+        super(name);
     }
 
     public void addCreditBankDoubleBlock(Bank bank, DoubleBlock doubleBlock){
-        customerBlockInCreditCardBank.put(bank.getId(), doubleBlock);
+        customerBlockInCreditCardBank.put(bank.getName(), doubleBlock);
     }
 
     public void addCustomerBill(Customer customer){
-        customersBill.put(customer.getId(), customer.getBillIdInDepositBank());
+        customersBill.put(customer.getName(), customer.getBillIdInDepositBank());
     }
 
 
     public void addSharedKey(Customer customer){
-        sharedCustomerKey.put(customer.getId(), customer.getSecretKeySharedWithDepositBank());
+        sharedCustomerKey.put(customer.getName(), customer.getSecretKeySharedWithDepositBank());
     }
 
     public void addMoneyToBill(Customer customer, String money){
-        Integer currentBill = Integer.parseInt(customerMoney.get(customer.getId()));
+        Integer currentBill = Integer.parseInt(customerMoney.get(customer.getName()));
         currentBill += Integer.parseInt(money);
-        customerMoney.put(customer.getId(), currentBill.toString());
+        customerMoney.put(customer.getName(), currentBill.toString());
     }
 
     public void getMoneyFromBill(Customer customer, String money){
-        Integer currentBill = Integer.parseInt(customerMoney.get(customer.getId()));
+        Integer currentBill = Integer.parseInt(customerMoney.get(customer.getName()));
         currentBill -= Integer.parseInt(money);
         if (currentBill < 0){
             System.out.println("Недостаточно средств!");
         }else {
-            customerMoney.put(customer.getId(), currentBill.toString());
+            customerMoney.put(customer.getName(), currentBill.toString());
         }
     }
 
     public void addNewBill(Customer customer){
-        customerMoney.put(customer.getId(), "0");
+        customerMoney.put(customer.getName(), "0");
     }
 
     public Map<String, String> getCustomerMoney() {

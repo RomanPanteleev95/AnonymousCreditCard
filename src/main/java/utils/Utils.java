@@ -10,23 +10,31 @@ import entities.Intermediary;
 import entities.banks.Bank;
 import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
-import org.apache.log4j.Logger;
 
 import java.sql.*;
 
 public class Utils {
     private static final DataBaseAnalog DATA_BASE_ANALOG = DataBaseAnalog.getDataBaseAnalog();
 
-    private static Statement getStatement() throws ClassNotFoundException, SQLException {
+    public static PreparedStatement getPreparedStatement(String query) throws SQLException, ClassNotFoundException {
+        return getConnection().prepareStatement(query);
+    }
+
+    public static Statement getStatement() throws ClassNotFoundException, SQLException {
+       return getConnection().createStatement();
+    }
+
+    private static Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
-        Connection connection = DriverManager.getConnection("jdbc:postgresql://ec2-54-217-236-201.eu-west-1.compute.amazonaws.com:5432" +
+        return DriverManager.getConnection("jdbc:postgresql://ec2-54-217-236-201.eu-west-1.compute.amazonaws.com:5432" +
                 "/ddh2dcreu9it5p?sslfactory=org.postgresql.ssl.NonValidatingFactory&user=wqdmxutohfcxex&password=78b1c206c96557b79a4b3a0968eea4f4975f8f3462a95c255ae68a7e86c95a66&ssl=true");
-        return connection.createStatement();
     }
 
 
+
+
     public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
-        String encryptBanckId = encryptString(bank.getId(), intermediaryKey);
+        String encryptBanckId = encryptString(bank.getName(), intermediaryKey);
         String encryptInnerBox = encryptString(innerBlock.getEncryptInformation(), intermediaryKey);
         innerBlock.setEncryptInformation(encryptInnerBox);
         return new DoubleBlock(encryptBanckId, innerBlock);
@@ -77,8 +85,8 @@ public class Utils {
         InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), billIdInDepositBank);
 
         Intermediary intermediary = Intermediary.getIntermediary();
-        DoubleBlock doubleBlockForCreditBanck = (DoubleBlock) getDLB(creditCardBank, customer.getId(), innerBlockForCreditBank, intermediary.getPrivateKey());
-        DoubleBlock doubleBlockForDepositBanck = (DoubleBlock) getDLB(depositBank, customer.getId(), innerBlockForDepositBanck, intermediary.getPrivateKey());
+        DoubleBlock doubleBlockForCreditBanck = (DoubleBlock) getDLB(creditCardBank, customer.getName(), innerBlockForCreditBank, intermediary.getPrivateKey());
+        DoubleBlock doubleBlockForDepositBanck = (DoubleBlock) getDLB(depositBank, customer.getName(), innerBlockForDepositBanck, intermediary.getPrivateKey());
 
         intermediary.addBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
         intermediary.addBankDoubleBlock(depositBank, doubleBlockForDepositBanck);
@@ -133,7 +141,7 @@ public class Utils {
     }
 
     public static void registrationLocation(Location location){
-        location.setLocationId("locationId");
+        location.setLocationName("locationId");
         String sharedKeyLocationWithIntermediary = "sharedKeyLocationWithIntermediary";
         Intermediary intermediary = Intermediary.getIntermediary();
         location.setSharedKeyWithIntermediary(sharedKeyLocationWithIntermediary);

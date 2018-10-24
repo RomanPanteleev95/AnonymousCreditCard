@@ -1,27 +1,25 @@
 package entities.banks;
 
-import entities.blocks.InnerBlock;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Bank {
-    protected String id;
+    protected String name;
     protected String privateKey;
     protected String sharedKeyWithIntermediary;
     protected Map<String, String> customersBill = new HashMap<>();
     protected Map<String, String> sharedCustomerKey = new HashMap<>();
 
-    public Bank(String id) {
-        this.id = id;
+    public Bank(String name) {
+        this.name = name;
     }
 
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPrivateKey() {
