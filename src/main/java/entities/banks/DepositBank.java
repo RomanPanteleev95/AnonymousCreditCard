@@ -19,8 +19,8 @@ public class DepositBank extends Bank{
     /* map: locationId -> sharedKey */
     private Map<String, String> sharedLocationKey = new HashMap<>();
 
-    public DepositBank(String name) {
-        super(name);
+    public DepositBank(int id, String name) {
+        super(id, name);
     }
 
     public void addCreditBankDoubleBlock(Bank bank, DoubleBlock doubleBlock){

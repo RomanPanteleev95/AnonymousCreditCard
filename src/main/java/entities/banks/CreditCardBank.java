@@ -9,8 +9,8 @@ import java.util.Map;
 public class CreditCardBank extends Bank{
     private Map<String, DoubleBlock> customerBlockInDepositBank = new HashMap<>();
 
-    public CreditCardBank(String name) {
-        super(name);
+    public CreditCardBank(int id, String name) {
+        super(id, name);
     }
 
     public void addDepositBanckDoubleBlock(Bank bank, DoubleBlock doubleBlock){

@@ -1,7 +1,6 @@
 package utils;
 
 import constants.Constant;
-import db.DataBaseAnalog;
 import entities.Customer;
 import entities.Location;
 import entities.blocks.DoubleBlock;
@@ -12,9 +11,9 @@ import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
 
 import java.sql.*;
+import java.util.UUID;
 
 public class Utils {
-    private static final DataBaseAnalog DATA_BASE_ANALOG = DataBaseAnalog.getDataBaseAnalog();
 
     public static PreparedStatement getPreparedStatement(String query) throws SQLException, ClassNotFoundException {
         return getConnection().prepareStatement(query);
@@ -29,9 +28,6 @@ public class Utils {
         return DriverManager.getConnection("jdbc:postgresql://ec2-54-217-236-201.eu-west-1.compute.amazonaws.com:5432" +
                 "/ddh2dcreu9it5p?sslfactory=org.postgresql.ssl.NonValidatingFactory&user=wqdmxutohfcxex&password=78b1c206c96557b79a4b3a0968eea4f4975f8f3462a95c255ae68a7e86c95a66&ssl=true");
     }
-
-
-
 
     public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
         String encryptBanckId = encryptString(bank.getName(), intermediaryKey);
@@ -62,27 +58,33 @@ public class Utils {
         return new String(inf);
     }
 
-    public static void createCustomer(String customerName){
-        DATA_BASE_ANALOG.addCustomer(new Customer(customerName));
-    }
 
-    public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank){
-        DataBaseAnalog dataBaseAnalog = DataBaseAnalog.getDataBaseAnalog();
-        String billIdInCreditCardCardBank = "billIdInCreditCardCardBank"; //random
-        String billIdInDepositBank = "billIdInDepositBank"; //random
-        String keySharedWithCreditBank = "keySharedWithCreditBank"; //random
-        String keySharedWithDepositBank = "keySharedWithDepositBank"; //random
+    public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank) throws SQLException, ClassNotFoundException {
+//        DataBaseUtils dataBaseUtils = DataBaseUtils.getDataBaseAnalog();
 
+        String accountIdInCreditCardCardBank = UUID.randomUUID().toString().replaceAll("-", "");
+        String accountIdInDepositBank = UUID.randomUUID().toString().replaceAll("-", "");
+        String keySharedWithCreditBank = UUID.randomUUID().toString().replaceAll("-", "");
+        String keySharedWithDepositBank = UUID.randomUUID().toString().replaceAll("-", "");
 
-        customer.setBillIdInCreditCardBank(billIdInCreditCardCardBank);
-        customer.setBillIdInDepositBank(billIdInDepositBank);
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.REGISTRATION_CUSTOMER_IN_BANK);
+        preparedStatement.setInt(1, creditCardBank.getId());
+        preparedStatement.setString(2, accountIdInCreditCardCardBank);
+        preparedStatement.setString(3, keySharedWithCreditBank);
+        preparedStatement.setInt(4, depositBank.getId());
+        preparedStatement.setString(5, accountIdInDepositBank);
+        preparedStatement.setString(6, keySharedWithDepositBank);
+        preparedStatement.setFloat(7, 0f);
+        preparedStatement.setString(8, customer.getName());
+        preparedStatement.executeUpdate();
+
+        customer.setBillIdInCreditCardBank(accountIdInCreditCardCardBank);
+        customer.setBillIdInDepositBank(accountIdInDepositBank);
         customer.setSecretKeySharedWithCreditCardBank(keySharedWithCreditBank);
         customer.setSecretKeySharedWithDepositBank(keySharedWithDepositBank);
 
-
-
-        InnerBlock innerBlockForCreditBank = getInnerBlock(creditCardBank.getPrivateKey(), billIdInCreditCardCardBank);
-        InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), billIdInDepositBank);
+        InnerBlock innerBlockForCreditBank = getInnerBlock(creditCardBank.getPrivateKey(), accountIdInCreditCardCardBank);
+        InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), accountIdInDepositBank);
 
         Intermediary intermediary = Intermediary.getIntermediary();
         DoubleBlock doubleBlockForCreditBanck = (DoubleBlock) getDLB(creditCardBank, customer.getName(), innerBlockForCreditBank, intermediary.getPrivateKey());
@@ -106,8 +108,6 @@ public class Utils {
             depBanck.addNewBill(customer);
         }
 
-       dataBaseAnalog.addCustomer(customer);
-
     }
 
     public static void registrationBank() throws ClassNotFoundException, SQLException {
@@ -121,21 +121,19 @@ public class Utils {
             String bankKeySharedWithIntemediary = rs.getString(5);
 
             if (bankType.equals("Deposit")){
-                DepositBank depositBank = new DepositBank(bankName);
+                DepositBank depositBank = new DepositBank(bankId, bankName);
                 depositBank.setPrivateKey(bankPrivateKey);
                 depositBank.setSharedKeyWithIntermediary(bankKeySharedWithIntemediary);
                 Intermediary intermediary = Intermediary.getIntermediary();
                 intermediary.addBanksSharedKey(depositBank, bankKeySharedWithIntemediary);
-                DATA_BASE_ANALOG.addDepositBank(depositBank);
             }
 
             if (bankType.equals("Credit")){
-                CreditCardBank creditCardBankBank = new CreditCardBank(bankName);
+                CreditCardBank creditCardBankBank = new CreditCardBank(bankId, bankName);
                 creditCardBankBank.setPrivateKey(bankPrivateKey);
                 creditCardBankBank.setSharedKeyWithIntermediary(bankKeySharedWithIntemediary);
                 Intermediary intermediary = Intermediary.getIntermediary();
                 intermediary.addBanksSharedKey(creditCardBankBank, bankKeySharedWithIntemediary);
-                DATA_BASE_ANALOG.addCreditBank(creditCardBankBank);
             }
         }
     }
