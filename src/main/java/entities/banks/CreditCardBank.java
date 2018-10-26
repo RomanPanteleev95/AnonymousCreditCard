@@ -13,12 +13,12 @@ public class CreditCardBank extends Bank{
         super(id, name);
     }
 
-    public void addDepositBanckDoubleBlock(Bank bank, DoubleBlock doubleBlock){
-        customerBlockInDepositBank.put(bank.getName(), doubleBlock);
+    public CreditCardBank(){
+
     }
 
-    public void addCustomerBill(Customer customer){
-        customersBill.put(customer.getName(), customer.getBillIdInCreditCardBank());
+    public void addDepositBanckDoubleBlock(Bank bank, DoubleBlock doubleBlock){
+        customerBlockInDepositBank.put(bank.getName(), doubleBlock);
     }
 
     public void addSharedKey(Customer customer){

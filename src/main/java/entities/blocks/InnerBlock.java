@@ -3,18 +3,18 @@ package entities.blocks;
 import java.util.Objects;
 
 public class InnerBlock {
-    private String encryptInformation;
+    private String information;
 
-    public InnerBlock(String encryptInformation) {
-        this.encryptInformation = encryptInformation;
+    public InnerBlock(String information) {
+        this.information = information;
     }
 
-    public String getEncryptInformation() {
-        return encryptInformation;
+    public String getInformation() {
+        return information;
     }
 
-    public void setEncryptInformation(String encryptInformation) {
-        this.encryptInformation = encryptInformation;
+    public void setInformation(String information) {
+        this.information = information;
     }
 
     @Override
@@ -22,11 +22,11 @@ public class InnerBlock {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InnerBlock that = (InnerBlock) o;
-        return Objects.equals(encryptInformation, that.encryptInformation);
+        return Objects.equals(information, that.information);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(encryptInformation);
+        return Objects.hash(information);
     }
 }

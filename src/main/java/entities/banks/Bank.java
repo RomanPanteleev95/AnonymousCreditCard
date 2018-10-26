@@ -3,12 +3,12 @@ package entities.banks;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class Bank {
+public class Bank {
     protected int id;
     protected String name;
+    protected String type;
     protected String privateKey;
     protected String sharedKeyWithIntermediary;
-    protected Map<String, String> customersBill = new HashMap<>();
     protected Map<String, String> sharedCustomerKey = new HashMap<>();
 
     public Bank(int id, String name) {
@@ -16,8 +16,16 @@ public abstract class Bank {
         this.name = name;
     }
 
+    public Bank(){
+
+    }
+
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -26,6 +34,14 @@ public abstract class Bank {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getPrivateKey() {
@@ -44,4 +60,11 @@ public abstract class Bank {
         this.sharedKeyWithIntermediary = sharedKeyWithIntermediary;
     }
 
+    public Map<String, String> getSharedCustomerKey() {
+        return sharedCustomerKey;
+    }
+
+    public void setSharedCustomerKey(Map<String, String> sharedCustomerKey) {
+        this.sharedCustomerKey = sharedCustomerKey;
+    }
 }

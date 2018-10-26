@@ -28,7 +28,7 @@ public class DepositBank extends Bank{
     }
 
     public void addCustomerBill(Customer customer){
-        customersBill.put(customer.getName(), customer.getBillIdInDepositBank());
+        customerBill.put(customer.getName(), customer.getAccountIdInDepositBank());
     }
 
 

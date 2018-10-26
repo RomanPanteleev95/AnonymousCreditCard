@@ -40,20 +40,20 @@ public class CustomerToBankProtocol {
         //intermed decrypt DB
         String decriptionBankId = Utils.decryptString(decriptionDoubleBlock.getBankId(), INTERMEDIARY.getPrivateKey());
         InnerBlock innerBlock = decriptionDoubleBlock.getInnerBlock();
-        innerBlock.setEncryptInformation(Utils.decryptString(innerBlock.getEncryptInformation(), INTERMEDIARY.getPrivateKey()));
+        innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), INTERMEDIARY.getPrivateKey()));
 
         String sharedKeyWithDepositBank = INTERMEDIARY.getBankSharedKey(decriptionBankId);
         message.setBody(Utils.encryptString(message.getBody(), sharedKeyWithDepositBank));
-        innerBlock.setEncryptInformation(Utils.encryptString(innerBlock.getEncryptInformation(), sharedKeyWithDepositBank));
+        innerBlock.setInformation(Utils.encryptString(innerBlock.getInformation(), sharedKeyWithDepositBank));
 
         //deposit bank decryptMes
         message.setBody(Utils.decryptString(message.getBody(), depositBank.getSharedKeyWithIntermediary()));
-        innerBlock.setEncryptInformation(Utils.decryptString(innerBlock.getEncryptInformation(), depositBank.getSharedKeyWithIntermediary()));
-        innerBlock.setEncryptInformation(Utils.decryptString(innerBlock.getEncryptInformation(), depositBank.getPrivateKey()));
+        innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getSharedKeyWithIntermediary()));
+        innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getPrivateKey()));
 
         message.setBody(Utils.decryptString(message.getBody(), customer.getSecretKeySharedWithDepositBank()));
 
-        System.out.println("Клиент " + innerBlock.getEncryptInformation() + " запросил " + message.getBody() + "$");
+        System.out.println("Клиент " + innerBlock.getInformation() + " запросил " + message.getBody() + "$");
     }
 
 }
