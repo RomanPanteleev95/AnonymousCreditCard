@@ -1,5 +1,7 @@
 package entities.banks;
 
+import entities.blocks.DoubleBlock;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +12,15 @@ public class Bank {
     protected String privateKey;
     protected String sharedKeyWithIntermediary;
     protected Map<String, String> sharedCustomerKey = new HashMap<>();
+    protected Map<Integer, DoubleBlock> alliesDoubleBlocks = new HashMap<>();
+
+    public Map<Integer, DoubleBlock> getAlliesDoubleBlocks() {
+        return alliesDoubleBlocks;
+    }
+
+    public void setAlliesDoubleBlocks(Map<Integer, DoubleBlock> alliesDoubleBlocks) {
+        this.alliesDoubleBlocks = alliesDoubleBlocks;
+    }
 
     public Bank(int id, String name) {
         this.id = id;

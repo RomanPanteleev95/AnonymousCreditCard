@@ -5,65 +5,19 @@ import entities.Customer;
 import entities.banks.Bank;
 import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
+import entities.blocks.DoubleBlock;
+import entities.blocks.InnerBlock;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DataBaseUtils {
-//    private Map<String, Bank> depositBanks = new HashMap<>();
-//    private Map<String, Bank> creditCradBanks = new HashMap<>();
-//    private Map<String, Customer> customers = new HashMap<>();
-//
-//    private static DataBaseUtils dataBaseAnalog;
-//
-//    private DataBaseUtils(){
-//
-//    }
-//
-//    public static DataBaseUtils getDataBaseAnalog(){
-//        if (dataBaseAnalog == null){
-//            dataBaseAnalog = new DataBaseUtils();
-//        }
-//        return dataBaseAnalog;
-//    }
-//
-//    public void addDepositBank(Bank bank){
-//        depositBanks.put(bank.getName(), bank);
-//    }
-//
-//    public void addCreditBank(Bank bank){
-//        creditCradBanks.put(bank.getName(), bank);
-//    }
-//
-//    public void addCustomer(Customer customer){
-//        customers.put(customer.getName(), customer);
-//    }
-//
-//    public Bank getDepositBank(String depositBankId){
-//        return depositBanks.get(depositBankId);
-//    }
-//
-//    public Bank getCreditCardBank(String creditCardBankId){
-//        return creditCradBanks.get(creditCardBankId);
-//    }
-//
-//    public Customer getCustomer(String customerId){
-//        return customers.get(customerId);
-//    }
-//
-//    public Map<String, Customer> getCustomers() {
-//        return customers;
-//    }
-//
-//    public Map<String, Bank> getDepositBanks() {
-//        return depositBanks;
-//    }
-//
-//    public Map<String, Bank> getCreditCradBanks() {
-//        return creditCradBanks;
-//    }
     public static Bank getBankByID(int id) throws SQLException, ClassNotFoundException {
         PreparedStatement bankStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_BANK_BY_ID);
         bankStatement.setInt(1, id);
@@ -78,16 +32,16 @@ public class DataBaseUtils {
         return fillBankParametrs(resultSet);
     }
 
-    private static Bank fillBankParametrs(ResultSet resultSet) throws SQLException {
+    private static Bank fillBankParametrs(ResultSet resultSet) throws SQLException, ClassNotFoundException {
         Bank bank = new Bank();
         if (resultSet.next()){
-            Bank creditBank = new CreditCardBank();
-            creditBank.setId(resultSet.getInt("id"));
-            creditBank.setPrivateKey(resultSet.getString("private_key"));
-            creditBank.setSharedKeyWithIntermediary(resultSet.getString("shared_intermediary_key"));
-            creditBank.setName(resultSet.getString("name"));
-            creditBank.setType(resultSet.getString("type"));
+            bank.setId(resultSet.getInt("id"));
+            bank.setPrivateKey(resultSet.getString("private_key"));
+            bank.setSharedKeyWithIntermediary(resultSet.getString("shared_intermediary_key"));
+            bank.setName(resultSet.getString("name"));
+            bank.setType(resultSet.getString("type"));
         }
+        bank.setAlliesDoubleBlocks(getAliesDoubleBlocks(bank.getId()));
 
         if (bank.getType().equals("Credit")){
             return (CreditCardBank) bank;
@@ -146,5 +100,44 @@ public class DataBaseUtils {
         return statement.executeQuery(Constant.SqlQuery.GET_ALL_CREDIT_BANKS);
     }
 
+    public static void registrationCustomerInBank(int creditBankId, String accountIdInCreditCardCardBank, String keySharedWithCreditBank, int depositBankId, String accountIdInDepositBank, String keySharedWithDepositBank, String email) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.REGISTRATION_CUSTOMER_IN_BANK);
+        preparedStatement.setInt(1, creditBankId);
+        preparedStatement.setString(2, accountIdInCreditCardCardBank);
+        preparedStatement.setString(3, keySharedWithCreditBank);
+        preparedStatement.setInt(4, depositBankId);
+        preparedStatement.setString(5, accountIdInDepositBank);
+        preparedStatement.setString(6, keySharedWithDepositBank);
+        preparedStatement.setFloat(7, 0f);
+        preparedStatement.setString(8, email);
+        preparedStatement.executeUpdate();
+    }
 
+    public static void createDoubleBox(int customerId, int bank_id, DoubleBlock doubleBlock) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.CREATE_DOUBLE_BLOCK);
+        preparedStatement.setInt(1, customerId);
+        preparedStatement.setInt(2, bank_id);
+        preparedStatement.setString(3, doubleBlock.getBankName());
+        preparedStatement.setString(4, doubleBlock.getInnerBlock().getInformation());
+        preparedStatement.executeUpdate();
+    }
+
+    public static Map<Integer, DoubleBlock> getAliesDoubleBlocks(int bank_id) throws SQLException, ClassNotFoundException {
+        Map<Integer, DoubleBlock> resultMap = new HashMap<>();
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_ALIES_DOUBLE_BLOCKS);
+        preparedStatement.setInt(1, bank_id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet == null || !resultSet.next()){
+            return resultMap;
+        }
+
+        while (resultSet.next()){
+            int customerId = resultSet.getInt("customer_id");
+            InnerBlock innerBlock = new InnerBlock(resultSet.getString("innner_box"));
+            DoubleBlock doubleBlock = new DoubleBlock(resultSet.getString("encode_bank_name"), innerBlock);
+            resultMap.put(customerId, doubleBlock);
+        }
+
+        return resultMap;
+    }
 }

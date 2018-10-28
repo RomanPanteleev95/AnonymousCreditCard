@@ -5,11 +5,11 @@ import entities.blocks.DoubleBlock;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Intermediary {
-    private String privateKey = "intermediaryPrivateKey";
-    private Map<String, String> banksKey = new HashMap<>(); //name банка -> общий ключ с банком
-    private Map<String, DoubleBlock> doubleBlocks = new HashMap<>();
+    private String privateKey = UUID.randomUUID().toString().replaceAll("-", "");
+    private Map<String, String> banksSharedKey = new HashMap<>(); //name банка -> общий ключ с банком
     private Map<String, String> locationKey = new HashMap<>();
 
     private static Intermediary intermediary;
@@ -25,12 +25,8 @@ public class Intermediary {
         return intermediary;
     }
 
-    public void addBankDoubleBlock(Bank bank, DoubleBlock doubleBlock){
-        doubleBlocks.put(bank.getName(), doubleBlock);
-    }
-
-    public void addBanksSharedKey(Bank bank, String sharedKey){
-        banksKey.put(bank.getName(), sharedKey);
+    public void addBanksSharedKey(String bankName, String sharedKey){
+        banksSharedKey.put(bankName, sharedKey);
     }
 
     public String getPrivateKey() {
@@ -38,7 +34,7 @@ public class Intermediary {
     }
 
     public String getBankSharedKey(String banckId){
-        return banksKey.get(banckId);
+        return banksSharedKey.get(banckId);
     }
 
     public String getLocationSharedKey(String locationId){
@@ -47,18 +43,5 @@ public class Intermediary {
 
     public void addLocationSharedKey(Location location){
         locationKey.put(location.getLocationName(), location.getSharedKeyWithIntermediary());
-    }
-
-    public DoubleBlock getDoubleBlock(String banckId){
-        return doubleBlocks.get(banckId);
-    }
-
-    public String getSharedKeyByDoubleBlock(DoubleBlock doubleBlock){
-        for (String key : doubleBlocks.keySet()){
-            if (doubleBlock.equals(doubleBlocks.get(key))){
-                return key;
-            }
-        }
-        return null;
     }
 }

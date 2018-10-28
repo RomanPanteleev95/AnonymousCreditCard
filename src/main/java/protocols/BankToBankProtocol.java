@@ -15,23 +15,21 @@ public class BankToBankProtocol {
     private DoubleBlock destinationBankDoubleBlock;
     private Message message;
     private String messageHeader;
-    private Bank destinationBank;
+    private DoubleBlock destinationDoubleBlock;
     private Customer customer;
 
-    public BankToBankProtocol(Bank sourceBank, DoubleBlock destinationBankDoubleBlock, Message message, Bank destinationBank) {
+    public BankToBankProtocol(Bank sourceBank, DoubleBlock destinationBankDoubleBlock, Message message,  DoubleBlock destinationDoubleBlock) {
         this.sourceBank = sourceBank;
         this.destinationBankDoubleBlock = destinationBankDoubleBlock;
         this.message = message;
         this.messageHeader = sourceBank.getName();
-        this.destinationBank = destinationBank;
+        this.destinationDoubleBlock = destinationDoubleBlock;
     }
 
-    public BankToBankProtocol(Customer customer, Bank sourceBank, Bank destinationBank, Message message){
+    public BankToBankProtocol(Customer customer, Bank sourceBank, Message message){
         //TODO: add validation
-        DoubleBlock destinationDoubleBlock = INTERMEDIARY.getDoubleBlock(destinationBank.getName());
         this.customer = customer;
         this.sourceBank = sourceBank;
-        this.destinationBank = destinationBank;
         this.destinationBankDoubleBlock = destinationDoubleBlock;
         this.message = message;
         this.messageHeader = sourceBank.getName();
@@ -47,7 +45,7 @@ public class BankToBankProtocol {
         String sharedKeyWithSourceBank = INTERMEDIARY.getBankSharedKey(messageHeader);
         DoubleBlock decryptionDoubleBlock = Utils.decryptDoubleBlock(encryptionDoubleBlock, sharedKeyWithSourceBank);
         message.setBody(Utils.decryptString(message.getBody(),sharedKeyWithSourceBank));
-        String decryptionDestanationBankId = Utils.decryptString(decryptionDoubleBlock.getBankId(), INTERMEDIARY.getPrivateKey());
+        String decryptionDestanationBankId = Utils.decryptString(decryptionDoubleBlock.getBankName(), INTERMEDIARY.getPrivateKey());
         InnerBlock innerBlock = decryptionDoubleBlock.getInnerBlock();
         InnerBlock tmpInnerBlock = new InnerBlock(Utils.decryptString(innerBlock.getInformation(), INTERMEDIARY.getPrivateKey()));
 
@@ -59,9 +57,9 @@ public class BankToBankProtocol {
 
         message.setBody(Utils.decryptString(message.getBody(), sharedKeyWithDestinationBank));
         tmpInnerBlock.setInformation(Utils.decryptString(tmpInnerBlock.getInformation(), sharedKeyWithDestinationBank));
-        tmpInnerBlock.setInformation(Utils.decryptString(tmpInnerBlock.getInformation(), destinationBank.getPrivateKey()));
-        DepositBank depositBank = (DepositBank) destinationBank;
-        depositBank.addMoneyToBill(customer, message.getBody());
+//        tmpInnerBlock.setInformation(Utils.decryptString(tmpInnerBlock.getInformation(), destinationBank.getPrivateKey()));
+//        DepositBank depositBank = (DepositBank) destinationBank;
+//        depositBank.addMoneyToBill(customer, message.getBody());
 
         System.out.println(message.getBody() + "$ на счет клиента " + tmpInnerBlock.getInformation());
     }

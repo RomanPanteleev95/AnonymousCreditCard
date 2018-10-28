@@ -3,20 +3,20 @@ package entities.blocks;
 import java.util.Objects;
 
 public class DoubleBlock{
-    private String bankId;
+    private String bankName;
     private InnerBlock innerBlock;
 
-    public DoubleBlock(String bankId, InnerBlock innerBlock) {
-        this.bankId = bankId;
+    public DoubleBlock(String bankName, InnerBlock innerBlock) {
+        this.bankName = bankName;
         this.innerBlock = innerBlock;
     }
 
-    public String getBankId() {
-        return bankId;
+    public String getBankName() {
+        return bankName;
     }
 
-    public void setBankId(String bankId) {
-        this.bankId = bankId;
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
     }
 
     public InnerBlock getInnerBlock() {
@@ -32,12 +32,12 @@ public class DoubleBlock{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DoubleBlock that = (DoubleBlock) o;
-        return Objects.equals(bankId, that.bankId) &&
+        return Objects.equals(bankName, that.bankName) &&
                 Objects.equals(innerBlock, that.innerBlock);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bankId, innerBlock);
+        return Objects.hash(bankName, innerBlock);
     }
 }

@@ -11,6 +11,7 @@ import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
 
 import java.sql.*;
+import java.util.Map;
 import java.util.UUID;
 
 public class Utils {
@@ -60,24 +61,12 @@ public class Utils {
 
 
     public static void registrationCustomer(Customer customer, Bank creditCardBank, Bank depositBank) throws SQLException, ClassNotFoundException {
-//        DataBaseUtils dataBaseUtils = DataBaseUtils.getDataBaseAnalog();
-
         String accountIdInCreditCardCardBank = UUID.randomUUID().toString().replaceAll("-", "");
         String accountIdInDepositBank = UUID.randomUUID().toString().replaceAll("-", "");
         String keySharedWithCreditBank = UUID.randomUUID().toString().replaceAll("-", "");
         String keySharedWithDepositBank = UUID.randomUUID().toString().replaceAll("-", "");
 
-        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.REGISTRATION_CUSTOMER_IN_BANK);
-        preparedStatement.setInt(1, creditCardBank.getId());
-        preparedStatement.setString(2, accountIdInCreditCardCardBank);
-        preparedStatement.setString(3, keySharedWithCreditBank);
-        preparedStatement.setInt(4, depositBank.getId());
-        preparedStatement.setString(5, accountIdInDepositBank);
-        preparedStatement.setString(6, keySharedWithDepositBank);
-        preparedStatement.setFloat(7, 0f);
-        preparedStatement.setString(8, customer.getName());
-        preparedStatement.executeUpdate();
-
+        DataBaseUtils.registrationCustomerInBank(creditCardBank.getId(), accountIdInCreditCardCardBank, keySharedWithCreditBank, depositBank.getId(), accountIdInDepositBank, keySharedWithDepositBank, customer.getEmail());
         customer.setAccountIdInCreditCardBank(accountIdInCreditCardCardBank);
         customer.setAccountIdInDepositBank(accountIdInDepositBank);
         customer.setSecretKeySharedWithCreditCardBank(keySharedWithCreditBank);
@@ -90,50 +79,35 @@ public class Utils {
         DoubleBlock doubleBlockForCreditBanck = (DoubleBlock) getDLB(creditCardBank, customer.getName(), innerBlockForCreditBank, intermediary.getPrivateKey());
         DoubleBlock doubleBlockForDepositBanck = (DoubleBlock) getDLB(depositBank, customer.getName(), innerBlockForDepositBanck, intermediary.getPrivateKey());
 
-        intermediary.addBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
-        intermediary.addBankDoubleBlock(depositBank, doubleBlockForDepositBanck);
+        DataBaseUtils.createDoubleBox(customer.getId(), creditCardBank.getId(), doubleBlockForCreditBanck);
+        DataBaseUtils.createDoubleBox(customer.getId(), depositBank.getId(), doubleBlockForDepositBanck);
+
 
         if (creditCardBank instanceof CreditCardBank){
             CreditCardBank cardBank = (CreditCardBank) creditCardBank;
-            cardBank.addDepositBanckDoubleBlock(depositBank, doubleBlockForDepositBanck);
+//            cardBank.addDepositBanckDoubleBlock(depositBank, doubleBlockForDepositBanck);
             cardBank.addSharedKey(customer);
         }
 
         if (depositBank instanceof DepositBank){
             DepositBank depBanck = (DepositBank) depositBank;
-            depBanck.addCreditBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
-            depBanck.addCustomerBill(customer);
-            depBanck.addSharedKey(customer);
-            depBanck.addNewBill(customer);
+//            depBanck.addCreditBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
+//            depBanck.addCustomerBill(customer);
+//            depBanck.addSharedKey(customer);
+//            depBanck.addNewBill(customer);
         }
 
     }
 
-    public static void registrationBank() throws ClassNotFoundException, SQLException {
+    public static void startRefill() throws ClassNotFoundException, SQLException {
         Statement statement = getStatement();
         ResultSet rs = statement.executeQuery(Constant.SqlQuery.SELECT_ALL_BANKS);
         while (rs.next()){
             int bankId = rs.getInt(1);
             String bankName = rs.getString(2);
-            String bankType = rs.getString(3);
-            String bankPrivateKey = rs.getString(4);
             String bankKeySharedWithIntemediary = rs.getString(5);
-
-            if (bankType.equals("Deposit")){
-                DepositBank depositBank = new DepositBank(bankId, bankName);
-                depositBank.setPrivateKey(bankPrivateKey);
-                depositBank.setSharedKeyWithIntermediary(bankKeySharedWithIntemediary);
-                Intermediary intermediary = Intermediary.getIntermediary();
-                intermediary.addBanksSharedKey(depositBank, bankKeySharedWithIntemediary);
-            }
-
-            if (bankType.equals("Credit")){
-                CreditCardBank creditCardBankBank = new CreditCardBank(bankId, bankName);
-                creditCardBankBank.setPrivateKey(bankPrivateKey);
-                creditCardBankBank.setSharedKeyWithIntermediary(bankKeySharedWithIntemediary);
-                Intermediary intermediary = Intermediary.getIntermediary();
-                intermediary.addBanksSharedKey(creditCardBankBank, bankKeySharedWithIntemediary);
-            }
+            Intermediary intermediary = Intermediary.getIntermediary();
+            intermediary.addBanksSharedKey(bankName, bankKeySharedWithIntemediary);
         }
     }
 
@@ -146,14 +120,14 @@ public class Utils {
     }
 
     public static DoubleBlock encryptDoubleBlock(DoubleBlock doubleBlock, String key){
-        String encryptionBankIdFromDoubleBlock = Utils.encryptString(doubleBlock.getBankId(), key);
+        String encryptionBankIdFromDoubleBlock = Utils.encryptString(doubleBlock.getBankName(), key);
         InnerBlock innerBlock = doubleBlock.getInnerBlock();
         innerBlock.setInformation(Utils.encryptString( innerBlock.getInformation(), key));
         return new DoubleBlock(encryptionBankIdFromDoubleBlock, innerBlock);
     }
 
     public static DoubleBlock decryptDoubleBlock(DoubleBlock doubleBlock, String key){
-        String decriptionBankIdFromDoubleBlock = Utils.decryptString(doubleBlock.getBankId(), key);
+        String decriptionBankIdFromDoubleBlock = Utils.decryptString(doubleBlock.getBankName(), key);
         InnerBlock innerBlock = doubleBlock.getInnerBlock();
         innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), key));
         return new DoubleBlock(decriptionBankIdFromDoubleBlock, innerBlock);

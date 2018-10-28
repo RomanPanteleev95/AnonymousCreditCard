@@ -24,7 +24,7 @@ public class JavaFXTestRun extends Application {
     Scene customerOperationsScene;
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        Utils.registrationBank();
+        Utils.startRefill();
         launch(args);
     }
 
