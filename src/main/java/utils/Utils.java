@@ -7,11 +7,8 @@ import entities.blocks.DoubleBlock;
 import entities.blocks.InnerBlock;
 import entities.Intermediary;
 import entities.banks.Bank;
-import entities.banks.CreditCardBank;
-import entities.banks.DepositBank;
 
 import java.sql.*;
-import java.util.Map;
 import java.util.UUID;
 
 public class Utils {
@@ -82,13 +79,20 @@ public class Utils {
     }
 
     public static void startRefill() throws ClassNotFoundException, SQLException {
+        Intermediary intermediary = Intermediary.getIntermediary();
         Statement statement = getStatement();
-        ResultSet rs = statement.executeQuery(Constant.SqlQuery.SELECT_ALL_BANKS);
+        ResultSet rs = statement.executeQuery(Constant.SqlQuery.GET_ALL_BANKS);
         while (rs.next()){
             String bankName = rs.getString(2);
             String bankKeySharedWithIntemediary = rs.getString(5);
-            Intermediary intermediary = Intermediary.getIntermediary();
             intermediary.addBanksSharedKey(bankName, bankKeySharedWithIntemediary);
+        }
+
+        rs = statement.executeQuery(Constant.SqlQuery.GET_ALL_LOCATIONS);
+        while (rs.next()){
+            int locationId = rs.getInt("id");
+            String sharedKeyWirhIntemediary = rs.getString("shared_key_with_intermediary");
+            intermediary.addLocationSharedKey(locationId, sharedKeyWirhIntemediary);
         }
     }
 

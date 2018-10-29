@@ -19,7 +19,7 @@ public interface Constant {
     }
 
     interface SqlQuery{
-        String SELECT_ALL_BANKS = "select * from banks";
+        String GET_ALL_BANKS = "select * from banks";
         String GET_BANK_BY_NAME = "select * from banks where name = ?";
         String SELCT_USER_PASSWORD_BY_NAME = "select * from customers where name = ?";
         String CREATE_NEW_CUSTOMER = "insert into customers  (\"name\", \"customer_password\", \"email\") values (?, ?, ?)";
@@ -32,9 +32,10 @@ public interface Constant {
         String GET_CUSTOMER_BY_NAME = "select * from customers where name = ?";
         String CREATE_DOUBLE_BLOCK = "insert into double_blocks (\"customer_id\", \"bank_id\", \"encode_bank_name\", \"innner_box\") values (?,?,?)";
         String ADD_ALIES_DOUBLE_BLOCK = "insert into alies_double_blocks (\"bank_id\", \"alies_double_block_id\") values (?,?)";
-        //TODO: filtration allies blocks by customer_id
         String GET_ALIES_DOUBLE_BLOCKS = "select * from double_blocks db, alies_double_blocks adb where db.id = adb.alies_double_block_id and adb.bank_id = ?";
         String GET_LAST_DOUBLE_BLOCK = "select * from double_blocks order by id desc limit 1";
         String GET_LAST_CUSTOMER = "select * from customers order by id desc limit 1";
+        String GET_ALL_LOCATIONS = "select * from locations";
+
     }
 }

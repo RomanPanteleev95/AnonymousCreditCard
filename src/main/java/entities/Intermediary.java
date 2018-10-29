@@ -1,8 +1,5 @@
 package entities;
 
-import entities.banks.Bank;
-import entities.blocks.DoubleBlock;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -10,7 +7,7 @@ import java.util.UUID;
 public class Intermediary {
     private String privateKey = UUID.randomUUID().toString().replaceAll("-", "");
     private Map<String, String> banksSharedKey = new HashMap<>(); //name банка -> общий ключ с банком
-    private Map<String, String> locationKey = new HashMap<>();
+    private Map<Integer, String> locationSharedKey = new HashMap<>();
 
     private static Intermediary intermediary;
 
@@ -38,10 +35,10 @@ public class Intermediary {
     }
 
     public String getLocationSharedKey(String locationId){
-        return locationKey.get(locationId);
+        return locationSharedKey.get(locationId);
     }
 
-    public void addLocationSharedKey(Location location){
-        locationKey.put(location.getLocationName(), location.getSharedKeyWithIntermediary());
+    public void addLocationSharedKey(int locationId, String sharedKey){
+        locationSharedKey.put(locationId, sharedKey);
     }
 }
