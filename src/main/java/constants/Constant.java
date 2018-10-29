@@ -36,6 +36,8 @@ public interface Constant {
         String GET_LAST_DOUBLE_BLOCK = "select * from double_blocks order by id desc limit 1";
         String GET_LAST_CUSTOMER = "select * from customers order by id desc limit 1";
         String GET_ALL_LOCATIONS = "select * from locations";
-
+        String GET_CUSTOMER_DOUBLE_BLOCK_BY_BANK_ID = "select * from double_blocks where customer_id = ? and bank_id = ?";
+        String GET_MONEY_FROM_CUSTOMER_ACCOUNT = "select * from account_money where account_id_in_deposit_bank = ?";
+        String UPDATE_MONEY_ON_ACCPUNT = "update account_money set current_money = ? where account_id_in_deposit_bank = ?";
     }
 }

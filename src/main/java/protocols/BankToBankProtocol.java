@@ -53,7 +53,7 @@ public class BankToBankProtocol {
         message.setBody(Utils.decryptString(message.getBody(), destanationBank.getSharedKeyWithIntermediary()));
         tmpInnerBlock.setInformation(Utils.decryptString(tmpInnerBlock.getInformation(), destanationBank.getSharedKeyWithIntermediary()));
         String customerAccountId = Utils.decryptString(tmpInnerBlock.getInformation(), destanationBank.getPrivateKey());
-        DataBaseUtils.updateMoneyOnCustomerAccount(customerAccountId);
+        DataBaseUtils.addMoneyOnCustomerAccount(customerAccountId, Float.parseFloat(message.getBody()));
     }
 
 }

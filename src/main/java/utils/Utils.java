@@ -101,7 +101,6 @@ public class Utils {
         String sharedKeyLocationWithIntermediary = "sharedKeyLocationWithIntermediary";
         Intermediary intermediary = Intermediary.getIntermediary();
         location.setSharedKeyWithIntermediary(sharedKeyLocationWithIntermediary);
-        intermediary.addLocationSharedKey(location);
     }
 
     public static DoubleBlock encryptDoubleBlock(DoubleBlock doubleBlock, String key){

@@ -158,7 +158,37 @@ public class DataBaseUtils {
         return id;
     }
 
-    public static void updateMoneyOnCustomerAccount(String customerAccountId){
+    public static void addMoneyOnCustomerAccount(String customerAccountId, float money) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_MONEY_FROM_CUSTOMER_ACCOUNT);
+        preparedStatement.setString(1, customerAccountId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        Float currentMoney = Float.parseFloat(resultSet.getString("current_money"));
+        currentMoney += money;
+        preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.UPDATE_MONEY_ON_ACCPUNT);
+        preparedStatement.setString(1, currentMoney.toString());
+        preparedStatement.setString(2, customerAccountId);
+        preparedStatement.executeUpdate();
+    }
 
+    public static void removeMoneyFromCustomerAccount(String customerAccountId, float money) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_MONEY_FROM_CUSTOMER_ACCOUNT);
+        preparedStatement.setString(1, customerAccountId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        Float currentMoney = Float.parseFloat(resultSet.getString("current_money"));
+        currentMoney -= money;
+        preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.UPDATE_MONEY_ON_ACCPUNT);
+        preparedStatement.setString(1, currentMoney.toString());
+        preparedStatement.setString(2, customerAccountId);
+        preparedStatement.executeUpdate();
+    }
+
+    public static DoubleBlock getCustomerDoubleBlockByBankId(int customerId, int bankId) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_CUSTOMER_DOUBLE_BLOCK_BY_BANK_ID);
+        preparedStatement.setInt(1, customerId);
+        preparedStatement.setInt(2, bankId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        InnerBlock innerBlock = new InnerBlock(resultSet.getString("innner_box"));
+        DoubleBlock doubleBlock = new DoubleBlock(resultSet.getString("encode_bank_name"), innerBlock);
+        return doubleBlock;
     }
 }
