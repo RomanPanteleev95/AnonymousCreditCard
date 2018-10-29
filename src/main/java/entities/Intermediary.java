@@ -33,8 +33,8 @@ public class Intermediary {
         return privateKey;
     }
 
-    public String getBankSharedKey(String banckId){
-        return banksSharedKey.get(banckId);
+    public String getBankSharedKey(String banckName){
+        return banksSharedKey.get(banckName);
     }
 
     public String getLocationSharedKey(String locationId){

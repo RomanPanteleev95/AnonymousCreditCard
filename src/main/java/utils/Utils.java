@@ -67,10 +67,6 @@ public class Utils {
         String keySharedWithDepositBank = UUID.randomUUID().toString().replaceAll("-", "");
 
         DataBaseUtils.registrationCustomerInBank(creditCardBank.getId(), accountIdInCreditCardCardBank, keySharedWithCreditBank, depositBank.getId(), accountIdInDepositBank, keySharedWithDepositBank, customer.getEmail());
-        customer.setAccountIdInCreditCardBank(accountIdInCreditCardCardBank);
-        customer.setAccountIdInDepositBank(accountIdInDepositBank);
-        customer.setSecretKeySharedWithCreditCardBank(keySharedWithCreditBank);
-        customer.setSecretKeySharedWithDepositBank(keySharedWithDepositBank);
 
         InnerBlock innerBlockForCreditBank = getInnerBlock(creditCardBank.getPrivateKey(), accountIdInCreditCardCardBank);
         InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), accountIdInDepositBank);
@@ -80,30 +76,15 @@ public class Utils {
         DoubleBlock doubleBlockForDepositBanck = (DoubleBlock) getDLB(depositBank, customer.getName(), innerBlockForDepositBanck, intermediary.getPrivateKey());
 
         DataBaseUtils.createDoubleBox(customer.getId(), creditCardBank.getId(), doubleBlockForCreditBanck);
+        DataBaseUtils.addAlliesDoubleBox(depositBank.getId(), DataBaseUtils.getLastDoubleBlockId());
         DataBaseUtils.createDoubleBox(customer.getId(), depositBank.getId(), doubleBlockForDepositBanck);
-
-
-        if (creditCardBank instanceof CreditCardBank){
-            CreditCardBank cardBank = (CreditCardBank) creditCardBank;
-//            cardBank.addDepositBanckDoubleBlock(depositBank, doubleBlockForDepositBanck);
-            cardBank.addSharedKey(customer);
-        }
-
-        if (depositBank instanceof DepositBank){
-            DepositBank depBanck = (DepositBank) depositBank;
-//            depBanck.addCreditBankDoubleBlock(creditCardBank, doubleBlockForCreditBanck);
-//            depBanck.addCustomerBill(customer);
-//            depBanck.addSharedKey(customer);
-//            depBanck.addNewBill(customer);
-        }
-
+        DataBaseUtils.addAlliesDoubleBox(creditCardBank.getId(), DataBaseUtils.getLastDoubleBlockId());
     }
 
     public static void startRefill() throws ClassNotFoundException, SQLException {
         Statement statement = getStatement();
         ResultSet rs = statement.executeQuery(Constant.SqlQuery.SELECT_ALL_BANKS);
         while (rs.next()){
-            int bankId = rs.getInt(1);
             String bankName = rs.getString(2);
             String bankKeySharedWithIntemediary = rs.getString(5);
             Intermediary intermediary = Intermediary.getIntermediary();

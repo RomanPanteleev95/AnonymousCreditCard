@@ -140,4 +140,25 @@ public class DataBaseUtils {
 
         return resultMap;
     }
+
+    public static void addAlliesDoubleBox(int bankId, int doubleBlockId) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.ADD_ALIES_DOUBLE_BLOCK);
+        preparedStatement.setInt(1, bankId);
+        preparedStatement.setInt(2, doubleBlockId);
+        preparedStatement.executeUpdate();
+    }
+
+    public static int getLastDoubleBlockId() throws SQLException, ClassNotFoundException {
+        Statement statement = Utils.getStatement();
+        ResultSet resultSet = statement.executeQuery(Constant.SqlQuery.GET_LAST_DOUBLE_BLOCK);
+        int id = 0;
+        if (resultSet.next()){
+            id = resultSet.getInt("id");
+        }
+        return id;
+    }
+
+    public static void updateMoneyOnCustomerAccount(String customerAccountId){
+
+    }
 }
