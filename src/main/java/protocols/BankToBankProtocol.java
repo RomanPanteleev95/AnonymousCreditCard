@@ -13,7 +13,18 @@ import utils.Utils;
 import java.sql.SQLException;
 
 public class BankToBankProtocol {
-    private static final Intermediary INTERMEDIARY = Intermediary.getIntermediary();
+    private static Intermediary INTERMEDIARY = null;
+
+    static {
+        try {
+            INTERMEDIARY = Intermediary.getIntermediary();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     private Bank sourceBank;
     private DoubleBlock destinationBankDoubleBlock;
     private Message message;

@@ -1,21 +1,40 @@
 package entities;
 
+import constants.Constant;
+import utils.ConnectionUtils;
+import utils.DataBaseUtils;
+import utils.Utils;
+
+import javax.rmi.CORBA.Util;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class Intermediary {
-    private String privateKey = UUID.randomUUID().toString().replaceAll("-", "");
+    private String privateKey;
     private Map<String, String> banksSharedKey = new HashMap<>(); //name банка -> общий ключ с банком
     private Map<Integer, String> locationSharedKey = new HashMap<>();
 
     private static Intermediary intermediary;
 
-    private Intermediary(){
-
+    private Intermediary() throws SQLException, ClassNotFoundException {
+        Statement statement = Utils.getStatement();
+        ResultSet resultSet = statement.executeQuery(Constant.SqlQuery.GET_INTEMEDIARY_PRIVATE_KEY);
+        if (resultSet.next()){
+            privateKey = resultSet.getString("private_key");
+        }else {
+            privateKey = UUID.randomUUID().toString().replaceAll("-", "");
+            PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.CREATE_INTERMEDIARY_PRIVATE_KEY);
+            preparedStatement.setString(1, privateKey);
+            preparedStatement.executeUpdate();
+        }
     }
 
-    public static Intermediary getIntermediary(){
+    public static Intermediary getIntermediary() throws SQLException, ClassNotFoundException {
         if (intermediary == null){
             intermediary = new Intermediary();
         }

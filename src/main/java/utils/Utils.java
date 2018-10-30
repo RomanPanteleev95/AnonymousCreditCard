@@ -14,17 +14,11 @@ import java.util.UUID;
 public class Utils {
 
     public static PreparedStatement getPreparedStatement(String query) throws SQLException, ClassNotFoundException {
-        return getConnection().prepareStatement(query);
+        return ConnectionUtils.getConnection().prepareStatement(query);
     }
 
     public static Statement getStatement() throws ClassNotFoundException, SQLException {
-       return getConnection().createStatement();
-    }
-
-    private static Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("org.postgresql.Driver");
-        return DriverManager.getConnection("jdbc:postgresql://ec2-54-217-236-201.eu-west-1.compute.amazonaws.com:5432" +
-                "/ddh2dcreu9it5p?sslfactory=org.postgresql.ssl.NonValidatingFactory&user=wqdmxutohfcxex&password=78b1c206c96557b79a4b3a0968eea4f4975f8f3462a95c255ae68a7e86c95a66&ssl=true");
+       return ConnectionUtils.getConnection().createStatement();
     }
 
     public static DoubleBlock getDLB(Bank bank, String customerId, InnerBlock innerBlock, String intermediaryKey){
@@ -64,6 +58,7 @@ public class Utils {
         String keySharedWithDepositBank = UUID.randomUUID().toString().replaceAll("-", "");
 
         DataBaseUtils.registrationCustomerInBank(creditCardBank.getId(), accountIdInCreditCardCardBank, keySharedWithCreditBank, depositBank.getId(), accountIdInDepositBank, keySharedWithDepositBank, customer.getEmail());
+        DataBaseUtils.createAccounMoney(accountIdInDepositBank, 0f);
 
         InnerBlock innerBlockForCreditBank = getInnerBlock(creditCardBank.getPrivateKey(), accountIdInCreditCardCardBank);
         InnerBlock innerBlockForDepositBanck = getInnerBlock(depositBank.getPrivateKey(), accountIdInDepositBank);
@@ -91,12 +86,12 @@ public class Utils {
         rs = statement.executeQuery(Constant.SqlQuery.GET_ALL_LOCATIONS);
         while (rs.next()){
             int locationId = rs.getInt("id");
-            String sharedKeyWirhIntemediary = rs.getString("shared_key_with_intermediary");
+            String sharedKeyWirhIntemediary = rs.getString("shared_intermediary_key");
             intermediary.addLocationSharedKey(locationId, sharedKeyWirhIntemediary);
         }
     }
 
-    public static void registrationLocation(Location location){
+    public static void registrationLocation(Location location) throws SQLException, ClassNotFoundException {
         location.setLocationName("locationId");
         String sharedKeyLocationWithIntermediary = "sharedKeyLocationWithIntermediary";
         Intermediary intermediary = Intermediary.getIntermediary();

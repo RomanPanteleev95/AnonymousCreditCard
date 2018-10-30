@@ -43,11 +43,7 @@ public class DataBaseUtils {
         }
         bank.setAlliesDoubleBlocks(getAliesDoubleBlocks(bank.getId()));
 
-        if (bank.getType().equals("Credit")){
-            return (CreditCardBank) bank;
-        }else {
-            return (DepositBank) bank;
-        }
+      return bank;
 
     }
 
@@ -108,8 +104,7 @@ public class DataBaseUtils {
         preparedStatement.setInt(4, depositBankId);
         preparedStatement.setString(5, accountIdInDepositBank);
         preparedStatement.setString(6, keySharedWithDepositBank);
-        preparedStatement.setFloat(7, 0f);
-        preparedStatement.setString(8, email);
+        preparedStatement.setString(7, email);
         preparedStatement.executeUpdate();
     }
 
@@ -162,10 +157,11 @@ public class DataBaseUtils {
         PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_MONEY_FROM_CUSTOMER_ACCOUNT);
         preparedStatement.setString(1, customerAccountId);
         ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
         Float currentMoney = Float.parseFloat(resultSet.getString("current_money"));
         currentMoney += money;
         preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.UPDATE_MONEY_ON_ACCPUNT);
-        preparedStatement.setString(1, currentMoney.toString());
+        preparedStatement.setFloat(1, currentMoney);
         preparedStatement.setString(2, customerAccountId);
         preparedStatement.executeUpdate();
     }
@@ -177,7 +173,7 @@ public class DataBaseUtils {
         Float currentMoney = Float.parseFloat(resultSet.getString("current_money"));
         currentMoney -= money;
         preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.UPDATE_MONEY_ON_ACCPUNT);
-        preparedStatement.setString(1, currentMoney.toString());
+        preparedStatement.setFloat(1, currentMoney);
         preparedStatement.setString(2, customerAccountId);
         preparedStatement.executeUpdate();
     }
@@ -187,8 +183,16 @@ public class DataBaseUtils {
         preparedStatement.setInt(1, customerId);
         preparedStatement.setInt(2, bankId);
         ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
         InnerBlock innerBlock = new InnerBlock(resultSet.getString("innner_box"));
         DoubleBlock doubleBlock = new DoubleBlock(resultSet.getString("encode_bank_name"), innerBlock);
         return doubleBlock;
+    }
+
+    public static void createAccounMoney(String accountId, float money) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.CREATE_ACOOUNT_MONEY);
+        preparedStatement.setString(1, accountId);
+        preparedStatement.setFloat(2, money);
+        preparedStatement.executeUpdate();
     }
 }

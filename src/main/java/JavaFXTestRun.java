@@ -1,5 +1,8 @@
 import constants.Constant;
+import entities.Message;
 import entities.banks.Bank;
+import entities.blocks.DoubleBlock;
+import protocols.BankToBankProtocol;
 import utils.DataBaseUtils;
 import entities.Customer;
 import javafx.application.Application;
@@ -32,15 +35,14 @@ public class JavaFXTestRun extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         mainWindow = primaryStage;
-        menuScene = getMenuScene();
-        customerOperationsScene = customerOperations();
+        menuScene = menuScene();
 
         mainWindow.setScene(menuScene);
         mainWindow.show();
 
     }
 
-    public Scene getMenuScene(){
+    public Scene menuScene(){
         Label menuLable = new Label(Constant.UiText.MENU);
 
         Button createCustomerButton = new Button(Constant.UiText.SIGN_UP);
@@ -55,7 +57,7 @@ public class JavaFXTestRun extends Application {
         });
         customerOperations.setOnAction(event -> {
             Stage signInWindow = new Stage();
-            signInWindow.setScene(getSignIn(signInWindow));
+            signInWindow.setScene(signIn(signInWindow));
             signInWindow.show();
         });
 
@@ -69,7 +71,7 @@ public class JavaFXTestRun extends Application {
         return new Scene(menuStackPane, 300, 150);
     }
 
-    public Scene getRegistrationCustomerInBanksScene(Customer customer) throws SQLException, ClassNotFoundException {
+    public Scene registrationCustomerInBanksScene(Customer customer) throws SQLException, ClassNotFoundException {
         Label depositLabel = new Label(Constant.UiText.DEPOSIT_BANK);
         ChoiceBox<String> depositBankChoiceBox = new ChoiceBox<>();
         ResultSet depositBanks = DataBaseUtils.getAllDepositBanks();
@@ -92,7 +94,8 @@ public class JavaFXTestRun extends Application {
                 Bank creditBank = DataBaseUtils.getBankByName(creditBankChoiceBox.getValue());
                 Bank depositBank1 = DataBaseUtils.getBankByName(depositBankChoiceBox.getValue());
                 Utils.registrationCustomer(customer, creditBank, depositBank1);
-                mainWindow.setScene(getPersonalArea(customer));
+                Customer updatedCustomer = DataBaseUtils.getCustomerByID(customer.getId());
+                mainWindow.setScene(getPersonalArea(updatedCustomer));
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -118,56 +121,42 @@ public class JavaFXTestRun extends Application {
         return new Scene(createCustomerStackPane, 300, 300);
     }
 
-    public Scene customerOperations(){
-//        Label nameCustomerLabel = new Label("Имя клиента");
-//        Label nameDepositLabel = new Label("Название депозитного банка");
-//        Label nameCreditLabel = new Label("Название кредитного");
-//        Label sum = new Label("Сумма");
-//        TextField customerNameInput = new TextField();
-//        TextField creditBankNameInput = new TextField();
-//        TextField depositBankNameInput = new TextField();
-//        TextField moneyInput = new TextField();
-//        Button takeCreditButton = new Button("Пополнить");
-//        Button menuButton = new Button("Меню");
-//
-//        takeCreditButton.setOnAction(event -> {
-//            String customerName = customerNameInput.getText();
-//            String creditBankName = creditBankNameInput.getText();
-//            String depositBankName = depositBankNameInput.getText();
-//            String message = moneyInput.getText();
-//
-//            BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(DATA_BASE_ANALOG.getCustomer(customerName), DATA_BASE_ANALOG.getCreditCardBank(creditBankName),
-//                    DATA_BASE_ANALOG.getDepositBank(depositBankName), new Message(message));
-//            bankToBankProtocol.runProtocol();
-//
-//            customerNameInput.clear();
-//            depositBankNameInput.clear();
-//            creditBankNameInput.clear();
-//            mainWindow.setScene(menuScene);
-//        });
-//
-//        menuButton.setOnAction(event -> {
-//            mainWindow.setScene(menuScene);
-//            customerNameInput.clear();
-//            depositBankNameInput.clear();
-//            creditBankNameInput.clear();
-//        });
-//
-//        StackPane layout2 = new StackPane();
-//        layout2.getChildren().addAll(nameCustomerLabel, nameDepositLabel, nameCreditLabel, sum, customerNameInput,
-//                depositBankNameInput, creditBankNameInput, moneyInput, takeCreditButton, menuButton);
-//        StackPane.setMargin(nameCustomerLabel, new Insets(20, 50, 260, 50));
-//        StackPane.setMargin(customerNameInput, new Insets(50, 50, 230, 50));
-//        StackPane.setMargin(nameDepositLabel, new Insets(80, 50, 200, 50));
-//        StackPane.setMargin(depositBankNameInput, new Insets(110, 50, 170, 50));
-//        StackPane.setMargin(nameCreditLabel, new Insets(140, 50, 140, 50));
-//        StackPane.setMargin(creditBankNameInput, new Insets(170, 50, 110, 50));
-//        StackPane.setMargin(sum, new Insets(200, 50, 80, 50));
-//        StackPane.setMargin(moneyInput, new Insets(230, 50, 50, 50));
-//        StackPane.setMargin(takeCreditButton, new Insets(270, 50, 10, 50));
-//        StackPane.setMargin(menuButton, new Insets(270, 10, 10, 230));
-//        return new Scene(layout2, 300, 300);
-        return null;
+    public Scene customerOperations(Customer customer) throws SQLException, ClassNotFoundException {
+
+        Label sum = new Label("Сумма");
+        TextField moneyInput = new TextField();
+        Button takeCreditButton = new Button("Пополнить");
+        Button menuButton = new Button("Меню");
+
+        takeCreditButton.setOnAction(event -> {
+            String message = moneyInput.getText();
+            try {
+                Bank creditBank = DataBaseUtils.getBankByID(customer.getCreditBankId());
+                DoubleBlock destinationBankDoubleBlock = DataBaseUtils.getCustomerDoubleBlockByBankId(customer.getId(), customer.getDepositBankId());
+                BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(creditBank, destinationBankDoubleBlock, new Message(message));
+                bankToBankProtocol.runProtocol();
+                mainWindow.setScene(getPersonalArea(customer));
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
+        menuButton.setOnAction(event -> {
+            try {
+                mainWindow.setScene(getPersonalArea(customer));
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
+        StackPane layout2 = new StackPane();
+        layout2.getChildren().addAll(sum, moneyInput, takeCreditButton, menuButton);
+
+        StackPane.setMargin(sum, new Insets(80, 50, 200, 50));
+        StackPane.setMargin(moneyInput, new Insets(110, 50, 170, 50));
+        StackPane.setMargin(takeCreditButton, new Insets(270, 50, 10, 50));
+        StackPane.setMargin(menuButton, new Insets(270, 10, 10, 230));
+        return new Scene(layout2, 300, 300);
     }
 
     public Scene registrationScene(){
@@ -180,7 +169,7 @@ public class JavaFXTestRun extends Application {
         Button registrationButton = new Button(Constant.UiText.SIGN_UP);
         registrationButton.setOnAction(event -> {
             if (!emailInput.getText().isEmpty() && emailInput.getText() != null){
-                String password = UUID.randomUUID().toString().replaceAll("-", "");
+                String password = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6);
                 try {
                     MailNotification.sendPassword(emailInput.getText(), password);
                     DataBaseUtils.createNewCustomer(nameInput.getText(), emailInput.getText(), password);
@@ -201,7 +190,7 @@ public class JavaFXTestRun extends Application {
         return new Scene(registrationCustomerStackPante, 300, 300);
     }
 
-    public Scene getSignIn(Stage currentWindow){
+    public Scene signIn(Stage currentWindow){
         Label nameLabel = new Label(Constant.UiText.EMAIL);
         TextField emailInput = new TextField();
 
@@ -239,15 +228,34 @@ public class JavaFXTestRun extends Application {
         Button replenishAccountButton = new Button(Constant.UiText.REPLENISH_ACCOUNT);
         Label nameLabel = new Label(Constant.UiText.PERSONAL_AREA + customer.getName());
 
-        Bank creditBank = DataBaseUtils.getBankByID(customer.getCreditBankId());
-        Bank depositBank = DataBaseUtils.getBankByID(customer.getDepositBankId());
+        Bank creditBank = new Bank();
+        if (customer.getCreditBankId() != 0) {
+            creditBank = DataBaseUtils.getBankByID(customer.getCreditBankId());
+            registrationButton.setDisable(true);
+        }else {
+            replenishAccountButton.setDisable(true);
+        }
+        Bank depositBank = new Bank();
+        if (customer.getDepositBankId() != 0) {
+            depositBank = DataBaseUtils.getBankByID(customer.getDepositBankId());
+        }
 
-        Label creditBankLable = new Label(Constant.UiText.YOUR_CREDIT_BANK + (creditBank.getName().isEmpty() ? Constant.UiText.NOT_REGISTERED : creditBank.getName()));
-        Label depositBankLable = new Label(Constant.UiText.YOUR_DEPOSIT_BANK + (depositBank.getName().isEmpty() ? Constant.UiText.NOT_REGISTERED : depositBank.getName()));
+        Label creditBankLable = new Label(Constant.UiText.YOUR_CREDIT_BANK + (creditBank.getName() == null ? Constant.UiText.NOT_REGISTERED : creditBank.getName()));
+        Label depositBankLable = new Label(Constant.UiText.YOUR_DEPOSIT_BANK + (depositBank.getName() == null ? Constant.UiText.NOT_REGISTERED : depositBank.getName()));
 
         registrationButton.setOnAction(event -> {
             try {
-                mainWindow.setScene(getRegistrationCustomerInBanksScene(customer));
+                mainWindow.setScene(registrationCustomerInBanksScene(customer));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
+        replenishAccountButton.setOnAction(event -> {
+            try {
+                mainWindow.setScene(customerOperations(customer));
             } catch (SQLException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
