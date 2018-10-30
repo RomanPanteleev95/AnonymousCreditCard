@@ -16,6 +16,7 @@ public interface Constant {
         String YOUR_CREDIT_BANK = "Ваш кредитный банк: ";
         String YOUR_DEPOSIT_BANK = "Ваш депозитный банк: ";
         String REGISTRATION_IN_BANK = "Зарегистрироваться в банках";
+        String PAY_FOR_PURCHASE = "Оплатить покупку";
     }
 
     interface SqlQuery{
@@ -42,5 +43,6 @@ public interface Constant {
         String CREATE_ACOOUNT_MONEY = "insert into account_money (\"account_id\", \"current_money\") values (?, ?)";
         String GET_INTEMEDIARY_PRIVATE_KEY = "select * from intermediary_private_key";
         String CREATE_INTERMEDIARY_PRIVATE_KEY = "insert into intermediary_private_key (\"private_key\") values (?)";
+        String GET_LOCATION_BY_NAME = "select * from locations where name = ?";
     }
 }

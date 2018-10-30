@@ -5,6 +5,11 @@ public class Location {
     private String locationName;
     private String sharedKeyWithIntermediary;
 
+    public Location(int locationId, String locationName) {
+        this.locationId = locationId;
+        this.locationName = locationName;
+    }
+
     public int getLocationId() {
         return locationId;
     }

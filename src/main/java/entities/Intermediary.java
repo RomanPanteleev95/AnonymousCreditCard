@@ -53,7 +53,7 @@ public class Intermediary {
         return banksSharedKey.get(banckName);
     }
 
-    public String getLocationSharedKey(String locationId){
+    public String getLocationSharedKey(int locationId){
         return locationSharedKey.get(locationId);
     }
 

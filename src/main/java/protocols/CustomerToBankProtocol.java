@@ -47,7 +47,7 @@ public class CustomerToBankProtocol {
         message.setBody(Utils.encryptString(message.getBody(), location.getSharedKeyWithIntermediary()));
 
         //intermed decrypt DB + message
-        String sharedKeyWithLocation = INTERMEDIARY.getLocationSharedKey(location.getLocationName());
+        String sharedKeyWithLocation = INTERMEDIARY.getLocationSharedKey(location.getLocationId());
         message.setBody(Utils.decryptString(message.getBody(), sharedKeyWithLocation));
         DoubleBlock decriptionDoubleBlock = Utils.decryptDoubleBlock(encryptionDoubleBlock, sharedKeyWithLocation);
 
@@ -69,8 +69,6 @@ public class CustomerToBankProtocol {
 
         float money = Float.parseFloat(message.getBody());
         DataBaseUtils.removeMoneyFromCustomerAccount(innerBlock.getInformation(), money);
-
-        System.out.println("Клиент " + innerBlock.getInformation() + " запросил " + message.getBody() + "$");
     }
 
 }

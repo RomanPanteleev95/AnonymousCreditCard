@@ -2,6 +2,7 @@ package utils;
 
 import constants.Constant;
 import entities.Customer;
+import entities.Location;
 import entities.banks.Bank;
 import entities.banks.CreditCardBank;
 import entities.banks.DepositBank;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static utils.Utils.getStatement;
 
 public class DataBaseUtils {
     public static Bank getBankByID(int id) throws SQLException, ClassNotFoundException {
@@ -87,12 +90,12 @@ public class DataBaseUtils {
     }
 
     public static ResultSet getAllDepositBanks() throws SQLException, ClassNotFoundException {
-        Statement statement = Utils.getStatement();
+        Statement statement = getStatement();
         return statement.executeQuery(Constant.SqlQuery.GET_ALL_DEPOSIT_BANKS);
     }
 
     public static ResultSet getAllCreditBanks() throws SQLException, ClassNotFoundException {
-        Statement statement = Utils.getStatement();
+        Statement statement = getStatement();
         return statement.executeQuery(Constant.SqlQuery.GET_ALL_CREDIT_BANKS);
     }
 
@@ -144,7 +147,7 @@ public class DataBaseUtils {
     }
 
     public static int getLastDoubleBlockId() throws SQLException, ClassNotFoundException {
-        Statement statement = Utils.getStatement();
+        Statement statement = getStatement();
         ResultSet resultSet = statement.executeQuery(Constant.SqlQuery.GET_LAST_DOUBLE_BLOCK);
         int id = 0;
         if (resultSet.next()){
@@ -170,6 +173,7 @@ public class DataBaseUtils {
         PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_MONEY_FROM_CUSTOMER_ACCOUNT);
         preparedStatement.setString(1, customerAccountId);
         ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
         Float currentMoney = Float.parseFloat(resultSet.getString("current_money"));
         currentMoney -= money;
         preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.UPDATE_MONEY_ON_ACCPUNT);
@@ -194,5 +198,27 @@ public class DataBaseUtils {
         preparedStatement.setString(1, accountId);
         preparedStatement.setFloat(2, money);
         preparedStatement.executeUpdate();
+    }
+
+    public static List<Location> getAllLocation() throws SQLException, ClassNotFoundException {
+        List<Location> locations = new ArrayList<>();
+        Statement statement = getStatement();
+        ResultSet rs = statement.executeQuery(Constant.SqlQuery.GET_ALL_LOCATIONS);
+        while (rs.next()){
+            int locationId = rs.getInt("id");
+            String locationName = rs.getString("name");
+            locations.add(new Location(locationId, locationName));
+        }
+        return locations;
+    }
+
+    public static Location getLocationByName(String name) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_LOCATION_BY_NAME);
+        preparedStatement.setString(1, name);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        Location location = new Location(resultSet.getInt("id"), resultSet.getString("name"));
+        location.setSharedKeyWithIntermediary(resultSet.getString("shared_intermediary_key"));
+        return location;
     }
 }

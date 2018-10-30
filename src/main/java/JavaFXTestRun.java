@@ -1,8 +1,10 @@
 import constants.Constant;
+import entities.Location;
 import entities.Message;
 import entities.banks.Bank;
 import entities.blocks.DoubleBlock;
 import protocols.BankToBankProtocol;
+import protocols.CustomerToBankProtocol;
 import utils.DataBaseUtils;
 import entities.Customer;
 import javafx.application.Application;
@@ -18,6 +20,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 public class JavaFXTestRun extends Application {
@@ -95,7 +98,7 @@ public class JavaFXTestRun extends Application {
                 Bank depositBank1 = DataBaseUtils.getBankByName(depositBankChoiceBox.getValue());
                 Utils.registrationCustomer(customer, creditBank, depositBank1);
                 Customer updatedCustomer = DataBaseUtils.getCustomerByID(customer.getId());
-                mainWindow.setScene(getPersonalArea(updatedCustomer));
+                mainWindow.setScene(personalArea(updatedCustomer));
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -103,7 +106,7 @@ public class JavaFXTestRun extends Application {
 
         menuButton.setOnAction(event -> {
             try {
-                mainWindow.setScene(getPersonalArea(customer));
+                mainWindow.setScene(personalArea(customer));
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -135,7 +138,7 @@ public class JavaFXTestRun extends Application {
                 DoubleBlock destinationBankDoubleBlock = DataBaseUtils.getCustomerDoubleBlockByBankId(customer.getId(), customer.getDepositBankId());
                 BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(creditBank, destinationBankDoubleBlock, new Message(message));
                 bankToBankProtocol.runProtocol();
-                mainWindow.setScene(getPersonalArea(customer));
+                mainWindow.setScene(personalArea(customer));
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -143,7 +146,7 @@ public class JavaFXTestRun extends Application {
 
         menuButton.setOnAction(event -> {
             try {
-                mainWindow.setScene(getPersonalArea(customer));
+                mainWindow.setScene(personalArea(customer));
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -203,7 +206,7 @@ public class JavaFXTestRun extends Application {
                 Customer currentCustomer = DataBaseUtils.getCustomerByEmail(emailInput.getText());
                 if (passwordInput.getText().equals(currentCustomer.getCustomerPassword())){
                     currentWindow.close();
-                    mainWindow.setScene(getPersonalArea(currentCustomer));
+                    mainWindow.setScene(personalArea(currentCustomer));
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
@@ -223,9 +226,10 @@ public class JavaFXTestRun extends Application {
         return new Scene(signInStackPante, 300, 300);
     }
 
-    public Scene getPersonalArea(Customer customer) throws SQLException, ClassNotFoundException {
+    public Scene personalArea(Customer customer) throws SQLException, ClassNotFoundException {
         Button registrationButton = new Button(Constant.UiText.REGISTRATION_IN_BANK);
         Button replenishAccountButton = new Button(Constant.UiText.REPLENISH_ACCOUNT);
+        Button payForPurchase = new Button(Constant.UiText.PAY_FOR_PURCHASE);
         Label nameLabel = new Label(Constant.UiText.PERSONAL_AREA + customer.getName());
 
         Bank creditBank = new Bank();
@@ -234,6 +238,7 @@ public class JavaFXTestRun extends Application {
             registrationButton.setDisable(true);
         }else {
             replenishAccountButton.setDisable(true);
+            payForPurchase.setDisable(true);
         }
         Bank depositBank = new Bank();
         if (customer.getDepositBankId() != 0) {
@@ -263,15 +268,69 @@ public class JavaFXTestRun extends Application {
             }
         });
 
+        payForPurchase.setOnAction(event -> {
+            try {
+                mainWindow.setScene(payFroPurchaseScene(customer));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
         StackPane signInStackPante = new StackPane();
-        signInStackPante.getChildren().addAll(nameLabel, creditBankLable, depositBankLable, registrationButton, replenishAccountButton);
+        signInStackPante.getChildren().addAll(nameLabel, creditBankLable, depositBankLable, registrationButton, replenishAccountButton, payForPurchase);
         StackPane.setMargin(nameLabel, new Insets(5, 130, 290, 5));
         StackPane.setMargin(creditBankLable, new Insets(20, 130, 275, 5));
         StackPane.setMargin(depositBankLable, new Insets(35, 130, 260, 5));
         StackPane.setMargin(registrationButton, new Insets(100, 50, 180, 50));
         StackPane.setMargin(replenishAccountButton, new Insets(150, 50, 130, 50));
+        StackPane.setMargin(payForPurchase, new Insets(200, 50, 80, 50));
 
         return new Scene(signInStackPante, 300, 300);
+    }
+
+    public Scene payFroPurchaseScene(Customer customer) throws SQLException, ClassNotFoundException {
+        Label sum = new Label("Сумма покупки");
+        TextField moneyInput = new TextField();
+        Button payButton = new Button("Оплатить");
+        Button menuButton = new Button("Меню");
+        ChoiceBox<String> locationChoiceBox = new ChoiceBox<>();
+        List<Location> locations = DataBaseUtils.getAllLocation();
+        for (Location location : locations){
+            locationChoiceBox.getItems().addAll(location.getLocationName());
+        }
+
+        payButton.setOnAction(event -> {
+            String message = moneyInput.getText();
+            try {
+                Bank depositBank = DataBaseUtils.getBankByID(customer.getDepositBankId());
+                Location currentLocation = DataBaseUtils.getLocationByName(locationChoiceBox.getValue());
+                CustomerToBankProtocol customerToBankProtocol = new CustomerToBankProtocol(currentLocation, depositBank, customer, new Message(message));
+                customerToBankProtocol.runProtocol();
+                mainWindow.setScene(personalArea(customer));
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
+        menuButton.setOnAction(event -> {
+            try {
+                mainWindow.setScene(personalArea(customer));
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
+        StackPane layout2 = new StackPane();
+        layout2.getChildren().addAll(locationChoiceBox, sum, moneyInput, payButton, menuButton);
+
+        StackPane.setMargin(locationChoiceBox, new Insets(50, 50, 230, 50));
+        StackPane.setMargin(sum, new Insets(80, 50, 200, 50));
+        StackPane.setMargin(moneyInput, new Insets(110, 50, 170, 50));
+        StackPane.setMargin(payButton, new Insets(270, 50, 10, 50));
+        StackPane.setMargin(menuButton, new Insets(270, 10, 10, 230));
+        return new Scene(layout2, 300, 300);
     }
 
 }
