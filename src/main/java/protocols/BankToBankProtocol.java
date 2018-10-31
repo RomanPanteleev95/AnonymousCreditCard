@@ -1,7 +1,6 @@
 package protocols;
 
 import entities.Customer;
-import entities.banks.DepositBank;
 import entities.blocks.DoubleBlock;
 import entities.blocks.InnerBlock;
 import entities.Intermediary;

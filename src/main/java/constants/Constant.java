@@ -17,6 +17,7 @@ public interface Constant {
         String YOUR_DEPOSIT_BANK = "Ваш депозитный банк: ";
         String REGISTRATION_IN_BANK = "Зарегистрироваться в банках";
         String PAY_FOR_PURCHASE = "Оплатить покупку";
+        String CURRENT_BALANCE = "Ваш баланс: ";
     }
 
     interface SqlQuery{
@@ -44,5 +45,7 @@ public interface Constant {
         String GET_INTEMEDIARY_PRIVATE_KEY = "select * from intermediary_private_key";
         String CREATE_INTERMEDIARY_PRIVATE_KEY = "insert into intermediary_private_key (\"private_key\") values (?)";
         String GET_LOCATION_BY_NAME = "select * from locations where name = ?";
+        String GET_LOCATION_DOUBLE_BLOCK_BY_BANK_ID = "select * from double_blocks_location where location_id = ? and bank_id = ?";
+        String GET_CURRENT_BALANCE_BY_CUSTOMER_ID = "select current_money from account_money am, customers c where c.id = ? and c.account_id_in_deposit_bank = am.account_id";
     }
 }

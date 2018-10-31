@@ -4,6 +4,9 @@ public class Location {
     private int locationId;
     private String locationName;
     private String sharedKeyWithIntermediary;
+    private int depositBankId;
+    private String accountIdInDepositBank;
+    private String secretKeySharedWithDepositBank;
 
     public Location(int locationId, String locationName) {
         this.locationId = locationId;
@@ -32,5 +35,29 @@ public class Location {
 
     public void setSharedKeyWithIntermediary(String sharedKeyWithIntermediary) {
         this.sharedKeyWithIntermediary = sharedKeyWithIntermediary;
+    }
+
+    public int getDepositBankId() {
+        return depositBankId;
+    }
+
+    public void setDepositBankId(int depositBankId) {
+        this.depositBankId = depositBankId;
+    }
+
+    public String getAccountIdInDepositBank() {
+        return accountIdInDepositBank;
+    }
+
+    public void setAccountIdInDepositBank(String accountIdInDepositBank) {
+        this.accountIdInDepositBank = accountIdInDepositBank;
+    }
+
+    public String getSecretKeySharedWithDepositBank() {
+        return secretKeySharedWithDepositBank;
+    }
+
+    public void setSecretKeySharedWithDepositBank(String secretKeySharedWithDepositBank) {
+        this.secretKeySharedWithDepositBank = secretKeySharedWithDepositBank;
     }
 }

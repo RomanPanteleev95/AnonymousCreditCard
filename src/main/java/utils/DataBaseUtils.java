@@ -4,8 +4,6 @@ import constants.Constant;
 import entities.Customer;
 import entities.Location;
 import entities.banks.Bank;
-import entities.banks.CreditCardBank;
-import entities.banks.DepositBank;
 import entities.blocks.DoubleBlock;
 import entities.blocks.InnerBlock;
 
@@ -219,6 +217,30 @@ public class DataBaseUtils {
         resultSet.next();
         Location location = new Location(resultSet.getInt("id"), resultSet.getString("name"));
         location.setSharedKeyWithIntermediary(resultSet.getString("shared_intermediary_key"));
+        location.setDepositBankId(resultSet.getInt("deposit_bank_id"));
+        location.setAccountIdInDepositBank(resultSet.getString("account_id_in_deposit_bank"));
+        location.setSecretKeySharedWithDepositBank(resultSet.getString("shared_key_with_deposit_bank"));
         return location;
+    }
+
+    public static DoubleBlock getLocationDoubleBlockByBankId(int locationId, int bankId) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_LOCATION_DOUBLE_BLOCK_BY_BANK_ID);
+        preparedStatement.setInt(1, locationId);
+        preparedStatement.setInt(2, bankId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        InnerBlock innerBlock = new InnerBlock(resultSet.getString("innner_box"));
+        DoubleBlock doubleBlock = new DoubleBlock(resultSet.getString("encode_bank_name"), innerBlock);
+        return doubleBlock;
+    }
+
+    public static Float getCuurentBalance(Customer customer) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_CURRENT_BALANCE_BY_CUSTOMER_ID);
+        preparedStatement.setInt(1, customer.getId());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet.next()) {
+            return resultSet.getFloat("current_money");
+        }
+        return 0f;
     }
 }
