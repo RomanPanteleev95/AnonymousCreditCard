@@ -199,13 +199,15 @@ public class JavaFXTestRun extends Application {
 
                         StackPane errorStackPane = new StackPane();
                         errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
-                        StackPane.setMargin(errorLable, new Insets(5, 10, 40, 10));
-                        StackPane.setMargin(setDepositBankNameButton, new Insets(15, 50, 10, 50));
-                        errorWindow.setScene(new Scene(errorStackPane, 200, 50));
+                        StackPane.setMargin(errorLable, new Insets(10, 10, 85, 10));
+                        StackPane.setMargin(setDepositBankNameButton, new Insets(45, 20, 45, 20));
+                        errorWindow.setScene(new Scene(errorStackPane, 250, 100));
                         errorWindow.show();
                     }
-                } catch (SQLException | MessagingException | IOException| ClassNotFoundException e) {
+                } catch (SQLException | IOException| ClassNotFoundException e) {
                     e.printStackTrace();
+                } catch (MessagingException e) {
+                    errorStageEmail();
                 }
             }else {
                 errorStage();
@@ -240,6 +242,9 @@ public class JavaFXTestRun extends Application {
                     if (passwordInput.getText().equals(currentCustomer.getCustomerPassword())) {
                         currentWindow.close();
                         mainWindow.setScene(personalArea(currentCustomer));
+                    }
+                    else{
+                        errorStageEmailOrPassword();
                     }
                 }
             } catch (ClassNotFoundException | SQLException e) {
@@ -279,7 +284,7 @@ public class JavaFXTestRun extends Application {
 
         Label creditBankLable = new Label(Constant.UiText.YOUR_CREDIT_BANK + (creditBank.getName() == null ? Constant.UiText.NOT_REGISTERED : creditBank.getName()));
         Label depositBankLable = new Label(Constant.UiText.YOUR_DEPOSIT_BANK + (depositBank.getName() == null ? Constant.UiText.NOT_REGISTERED : depositBank.getName()));
-        Label carrentBalance = new Label(Constant.UiText.CURRENT_BALANCE + DataBaseUtils.getCuurentBalance(customer));
+        Label carrentBalance = new Label(Constant.UiText.CURRENT_BALANCE + DataBaseUtils.getCuurentBalance(customer) + " рублей");
 
         registrationButton.setOnAction(event -> {
             try {
@@ -389,9 +394,45 @@ public class JavaFXTestRun extends Application {
 
         StackPane errorStackPane = new StackPane();
         errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
-        StackPane.setMargin(errorLable, new Insets(5, 10, 40, 10));
-        StackPane.setMargin(setDepositBankNameButton, new Insets(15, 50, 10, 50));
-        errorWindow.setScene(new Scene(errorStackPane, 300, 50));
+        StackPane.setMargin(errorLable, new Insets(5, 10, 90, 10));
+        StackPane.setMargin(setDepositBankNameButton, new Insets(45, 20, 45, 20));
+        errorWindow.setScene(new Scene(errorStackPane, 300, 100));
+        errorWindow.show();
+
+    }
+
+    public void errorStageEmail(){
+        Stage errorWindow = new Stage();
+        Label errorLable = new Label("Неправильно введенный e-mail!");
+        Button setDepositBankNameButton = new Button("OK");
+
+        setDepositBankNameButton.setOnAction(event1 -> {
+            errorWindow.close();
+        });
+
+        StackPane errorStackPane = new StackPane();
+        errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
+        StackPane.setMargin(errorLable, new Insets(5, 10, 90, 10));
+        StackPane.setMargin(setDepositBankNameButton, new Insets(45, 20, 45, 20));
+        errorWindow.setScene(new Scene(errorStackPane, 300, 100));
+        errorWindow.show();
+
+    }
+
+    public void errorStageEmailOrPassword(){
+        Stage errorWindow = new Stage();
+        Label errorLable = new Label("Неправильно введенный e-mail или пароль!");
+        Button setDepositBankNameButton = new Button("OK");
+
+        setDepositBankNameButton.setOnAction(event1 -> {
+            errorWindow.close();
+        });
+
+        StackPane errorStackPane = new StackPane();
+        errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
+        StackPane.setMargin(errorLable, new Insets(5, 10, 90, 10));
+        StackPane.setMargin(setDepositBankNameButton, new Insets(45, 20, 45, 20));
+        errorWindow.setScene(new Scene(errorStackPane, 300, 100));
         errorWindow.show();
 
     }
