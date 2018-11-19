@@ -3,6 +3,7 @@ package entities;
 public class Customer {
     private int id;
     private String name;
+    private String shared_key_for_sig_in;
     private String customerPassword;
     private int creditBankId;
     private String accountIdInCreditCardBank;
@@ -35,6 +36,14 @@ public class Customer {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSharedKeyForSignIn() {
+        return shared_key_for_sig_in;
+    }
+
+    public void setSharedKeyForSignIn(String privateKey) {
+        this.shared_key_for_sig_in = privateKey;
     }
 
     public String getCustomerPassword() {

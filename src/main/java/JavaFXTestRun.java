@@ -13,21 +13,25 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import utils.KeyDistributionUtils;
 import utils.MailNotification;
 import utils.Utils;
+import validators.ValidatorsUtils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaFXTestRun extends Application {
 
     Stage mainWindow;
     Scene menuScene;
-    Scene customerOperationsScene;
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         Utils.startRefill();
@@ -177,6 +181,9 @@ public class JavaFXTestRun extends Application {
         Label emailLabel = new Label(Constant.UiText.EMAIL);
         TextField emailInput = new TextField();
 
+        Label privateKeyLablel = new Label("Придумайте личный ключ (6 цифр)");
+        TextField privateKeyInput = new TextField();
+
         Button registrationButton = new Button(Constant.UiText.SIGN_UP);
         registrationButton.setOnAction(event -> {
             if (!emailInput.getText().isEmpty() && emailInput.getText() != null){
@@ -185,24 +192,30 @@ public class JavaFXTestRun extends Application {
                     if (currentCustomer.getId() != 0){
                         alreadyExistErrorStage();
                     } else {
-                        String password = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6);
-                        MailNotification.sendPassword(emailInput.getText(), password);
-                        DataBaseUtils.createNewCustomer(nameInput.getText(), emailInput.getText(), password);
-                        Stage errorWindow = new Stage();
-                        Label errorLable = new Label("Письмо с паролем отправлено на почту!");
-                        Button setDepositBankNameButton = new Button("OK");
+                        if (!ValidatorsUtils.checkPrivateKey(privateKeyInput.getText()) || privateKeyInput.getText().length() != 6) {
+                            wrongPrivateKeyErrorStage();
+                        } else {
 
-                        setDepositBankNameButton.setOnAction(event1 -> {
-                            errorWindow.close();
-                            registrationWindow.close();
-                        });
+                            String password = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 6);
+                            Map<String, String> sharedKeys = KeyDistributionUtils.getsharedKeyForEncryptPassword(privateKeyInput.getText());
+                            MailNotification.sendPassword(emailInput.getText(), Utils.encryptString(password, sharedKeys.get("server")));
+                            DataBaseUtils.createNewCustomer(nameInput.getText(), sharedKeys.get("customer"), emailInput.getText(), password);
+                            Stage errorWindow = new Stage();
+                            Label errorLable = new Label("Письмо с паролем отправлено на почту!");
+                            Button setDepositBankNameButton = new Button("OK");
 
-                        StackPane errorStackPane = new StackPane();
-                        errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
-                        StackPane.setMargin(errorLable, new Insets(10, 10, 85, 10));
-                        StackPane.setMargin(setDepositBankNameButton, new Insets(45, 20, 45, 20));
-                        errorWindow.setScene(new Scene(errorStackPane, 250, 100));
-                        errorWindow.show();
+                            setDepositBankNameButton.setOnAction(event1 -> {
+                                errorWindow.close();
+                                registrationWindow.close();
+                            });
+
+                            StackPane errorStackPane = new StackPane();
+                            errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
+                            StackPane.setMargin(errorLable, new Insets(10, 10, 85, 10));
+                            StackPane.setMargin(setDepositBankNameButton, new Insets(45, 20, 45, 20));
+                            errorWindow.setScene(new Scene(errorStackPane, 250, 100));
+                            errorWindow.show();
+                        }
                     }
                 } catch (SQLException | IOException| ClassNotFoundException e) {
                     e.printStackTrace();
@@ -215,12 +228,14 @@ public class JavaFXTestRun extends Application {
         });
 
         StackPane registrationCustomerStackPante = new StackPane();
-        registrationCustomerStackPante.getChildren().addAll(nameLabel, nameInput, emailLabel, emailInput, registrationButton);
+        registrationCustomerStackPante.getChildren().addAll(nameLabel, nameInput, emailLabel, emailInput, privateKeyLablel, privateKeyInput, registrationButton);
         StackPane.setMargin(nameLabel, new Insets(17, 50, 262, 50));
         StackPane.setMargin(nameInput, new Insets(50, 50, 230, 50));
         StackPane.setMargin(emailLabel, new Insets(70, 50, 210, 50));
         StackPane.setMargin(emailInput, new Insets(100, 50, 180, 50));
-        StackPane.setMargin(registrationButton, new Insets(150, 50, 130, 50));
+        StackPane.setMargin(privateKeyLablel, new Insets(120, 50, 160, 50));
+        StackPane.setMargin(privateKeyInput, new Insets(150, 50, 130, 50));
+        StackPane.setMargin(registrationButton, new Insets(200, 50, 80, 50));
 
         return new Scene(registrationCustomerStackPante, 300, 300);
     }
@@ -232,6 +247,9 @@ public class JavaFXTestRun extends Application {
         Label passwordLabel = new Label(Constant.UiText.PASSWORD);
         TextField passwordInput = new TextField();
 
+        Label privateKeyLabel = new Label("Личный ключ");
+        TextField privateKeyInput = new TextField();
+
         Button signInButton = new Button(Constant.UiText.SIGN_IN);
         signInButton.setOnAction(event -> {
             try {
@@ -239,7 +257,12 @@ public class JavaFXTestRun extends Application {
                     errorStage();
                 } else {
                     Customer currentCustomer = DataBaseUtils.getCustomerByEmail(emailInput.getText());
-                    if (passwordInput.getText().equals(currentCustomer.getCustomerPassword())) {
+                    String inputPassword = passwordInput.getText();
+                    String privateKey = privateKeyInput.getText();
+                    String sharedKeyForSignIn = currentCustomer.getSharedKeyForSignIn();
+                    String sharedKey = KeyDistributionUtils.getSharedKeyForCustomer(privateKey, sharedKeyForSignIn);
+                    String truePassword = Utils.decryptString(inputPassword, sharedKey);
+                    if (truePassword.equals(currentCustomer.getCustomerPassword())) {
                         currentWindow.close();
                         mainWindow.setScene(personalArea(currentCustomer));
                     }
@@ -253,12 +276,14 @@ public class JavaFXTestRun extends Application {
         });
 
         StackPane signInStackPante = new StackPane();
-        signInStackPante.getChildren().addAll(nameLabel, emailInput, passwordLabel, passwordInput, signInButton);
+        signInStackPante.getChildren().addAll(nameLabel, emailInput, passwordLabel, passwordInput, privateKeyLabel, privateKeyInput, signInButton);
         StackPane.setMargin(nameLabel, new Insets(17, 50, 262, 50));
         StackPane.setMargin(emailInput, new Insets(50, 50, 230, 50));
         StackPane.setMargin(passwordLabel, new Insets(70, 50, 210, 50));
         StackPane.setMargin(passwordInput, new Insets(100, 50, 180, 50));
-        StackPane.setMargin(signInButton, new Insets(150, 50, 130, 50));
+        StackPane.setMargin(privateKeyLabel, new Insets(120, 50, 150, 50));
+        StackPane.setMargin(privateKeyInput, new Insets(150, 50, 130, 50));
+        StackPane.setMargin(signInButton, new Insets(200, 50, 80, 50));
 
         return new Scene(signInStackPante, 300, 300);
     }
@@ -284,7 +309,7 @@ public class JavaFXTestRun extends Application {
 
         Label creditBankLable = new Label(Constant.UiText.YOUR_CREDIT_BANK + (creditBank.getName() == null ? Constant.UiText.NOT_REGISTERED : creditBank.getName()));
         Label depositBankLable = new Label(Constant.UiText.YOUR_DEPOSIT_BANK + (depositBank.getName() == null ? Constant.UiText.NOT_REGISTERED : depositBank.getName()));
-        Label carrentBalance = new Label(Constant.UiText.CURRENT_BALANCE + DataBaseUtils.getCuurentBalance(customer) + " рублей");
+        Label carrentBalance = new Label(Constant.UiText.CURRENT_BALANCE + String.format("%.2f", DataBaseUtils.getCuurentBalance(customer)) + " рублей");
 
         registrationButton.setOnAction(event -> {
             try {
@@ -346,17 +371,21 @@ public class JavaFXTestRun extends Application {
                 if (message.isEmpty() || message == null || locationChoiceBox.getValue().isEmpty() || locationChoiceBox.getValue() == null){
                     errorStage();
                 } else {
-                    if (Float.parseFloat(message) > DataBaseUtils.getCuurentBalance(customer)){
-                        smallBalance();
+                    if (!ValidatorsUtils.checkMoneyFormat(message)) {
+                        wrongMoneyFormatErrorStage();
                     } else {
-                        Bank depositBank = DataBaseUtils.getBankByID(customer.getDepositBankId());
-                        Location currentLocation = DataBaseUtils.getLocationByName(locationChoiceBox.getValue());
-                        CustomerToBankProtocol customerToBankProtocol = new CustomerToBankProtocol(currentLocation, depositBank, customer, new Message(message));
-                        customerToBankProtocol.runProtocol();
-                        DoubleBlock locationDoubleBlock = DataBaseUtils.getLocationDoubleBlockByBankId(currentLocation.getLocationId(), currentLocation.getDepositBankId());
-                        BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(depositBank, locationDoubleBlock, new Message(message));
-                        bankToBankProtocol.runProtocol();
-                        mainWindow.setScene(personalArea(customer));
+                        if (Float.parseFloat(message) > DataBaseUtils.getCuurentBalance(customer)) {
+                            smallBalance();
+                        } else {
+                            Bank depositBank = DataBaseUtils.getBankByID(customer.getDepositBankId());
+                            Location currentLocation = DataBaseUtils.getLocationByName(locationChoiceBox.getValue());
+                            CustomerToBankProtocol customerToBankProtocol = new CustomerToBankProtocol(currentLocation, depositBank, customer, new Message(message));
+                            customerToBankProtocol.runProtocol();
+                            DoubleBlock locationDoubleBlock = DataBaseUtils.getLocationDoubleBlockByBankId(currentLocation.getLocationId(), currentLocation.getDepositBankId());
+                            BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(depositBank, locationDoubleBlock, new Message(message));
+                            bankToBankProtocol.runProtocol();
+                            mainWindow.setScene(personalArea(customer));
+                        }
                     }
                 }
             } catch (SQLException | ClassNotFoundException e) {
@@ -439,7 +468,41 @@ public class JavaFXTestRun extends Application {
 
     public void alreadyExistErrorStage(){
         Stage errorWindow = new Stage();
-        Label errorLable = new Label("Данный email уже зарегистрирован!");
+        Label errorLable = new Label("Данный email уже зарегистрирован");
+        Button setDepositBankNameButton = new Button("OK");
+
+        setDepositBankNameButton.setOnAction(event1 -> {
+            errorWindow.close();
+        });
+
+        StackPane errorStackPane = new StackPane();
+        errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
+        StackPane.setMargin(errorLable, new Insets(5, 10, 40, 10));
+        StackPane.setMargin(setDepositBankNameButton, new Insets(15, 50, 10, 50));
+        errorWindow.setScene(new Scene(errorStackPane, 300, 50));
+        errorWindow.show();
+    }
+
+    public void wrongPrivateKeyErrorStage(){
+        Stage errorWindow = new Stage();
+        Label errorLable = new Label("Неверный формат личного ключа");
+        Button setDepositBankNameButton = new Button("OK");
+
+        setDepositBankNameButton.setOnAction(event1 -> {
+            errorWindow.close();
+        });
+
+        StackPane errorStackPane = new StackPane();
+        errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
+        StackPane.setMargin(errorLable, new Insets(5, 10, 40, 10));
+        StackPane.setMargin(setDepositBankNameButton, new Insets(15, 50, 10, 50));
+        errorWindow.setScene(new Scene(errorStackPane, 300, 50));
+        errorWindow.show();
+    }
+
+    public void wrongMoneyFormatErrorStage(){
+        Stage errorWindow = new Stage();
+        Label errorLable = new Label("Неверный денежный формат");
         Button setDepositBankNameButton = new Button("OK");
 
         setDepositBankNameButton.setOnAction(event1 -> {
@@ -470,5 +533,7 @@ public class JavaFXTestRun extends Application {
         errorWindow.setScene(new Scene(errorStackPane, 300, 50));
         errorWindow.show();
     }
+
+
 
 }

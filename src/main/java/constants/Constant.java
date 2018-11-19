@@ -24,7 +24,7 @@ public interface Constant {
         String GET_ALL_BANKS = "select * from banks";
         String GET_BANK_BY_NAME = "select * from banks where name = ?";
         String SELCT_USER_PASSWORD_BY_NAME = "select * from customers where name = ?";
-        String CREATE_NEW_CUSTOMER = "insert into customers  (\"name\", \"customer_password\", \"email\") values (?, ?, ?)";
+        String CREATE_NEW_CUSTOMER = "insert into customers  (\"name\", \"shared_key_for_sig_in\", \"customer_password\", \"email\") values (?, ?, ?, ?)";
         String REGISTRATION_CUSTOMER_IN_BANK = "update customers set credit_bank_id = ?, account_id_in_credit_bank = ?, shared_key_with_credit_bank = ?, deposit_bank_id = ?, account_id_in_deposit_bank = ?, shared_key_with_deposit_bank = ? where email = ?";
         String GET_ALL_DEPOSIT_BANKS = "select * from banks where type like 'Депозитный банк'";
         String GET_ALL_CREDIT_BANKS = "select * from banks where type like 'Кредитный банк'";
@@ -47,5 +47,7 @@ public interface Constant {
         String GET_LOCATION_BY_NAME = "select * from locations where name = ?";
         String GET_LOCATION_DOUBLE_BLOCK_BY_BANK_ID = "select * from double_blocks_location where location_id = ? and bank_id = ?";
         String GET_CURRENT_BALANCE_BY_CUSTOMER_ID = "select current_money from account_money am, customers c where c.id = ? and c.account_id_in_deposit_bank = am.account_id";
+        String ADD_COMMON_PARAMETR = "insert into common_parametrs (\"name\", \"value\") values (?, ?)";
+        String GET_COMMON_PARAMETRS = "select * from common_parametrs";
     }
 }

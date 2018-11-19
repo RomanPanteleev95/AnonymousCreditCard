@@ -48,11 +48,12 @@ public class DataBaseUtils {
 
     }
 
-    public static void createNewCustomer(String name, String email, String password) throws SQLException, ClassNotFoundException {
+    public static void createNewCustomer(String name, String sharedKeyFroSignIn, String email, String password) throws SQLException, ClassNotFoundException {
         PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.CREATE_NEW_CUSTOMER);
         preparedStatement.setString(1,name);
-        preparedStatement.setString(2, password);
-        preparedStatement.setString(3, email);
+        preparedStatement.setString(2,sharedKeyFroSignIn);
+        preparedStatement.setString(3, password);
+        preparedStatement.setString(4, email);
         preparedStatement.executeUpdate();
     }
 
@@ -75,6 +76,7 @@ public class DataBaseUtils {
         if (resultSet.next()) {
             customer.setId(resultSet.getInt("id"));
             customer.setName(resultSet.getString("name"));
+            customer.setSharedKeyForSignIn(resultSet.getString("shared_key_for_sig_in"));
             customer.setEmail(resultSet.getString("email"));
             customer.setCustomerPassword(resultSet.getString("customer_password"));
             customer.setCreditBankId(resultSet.getInt("credit_bank_id"));
@@ -242,5 +244,25 @@ public class DataBaseUtils {
             return resultSet.getFloat("current_money");
         }
         return 0f;
+    }
+
+    public static void addCommonParametr(String name, String value) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.ADD_COMMON_PARAMETR);
+        preparedStatement.setString(1, name);
+        preparedStatement.setString(2, value);
+        preparedStatement.executeUpdate();
+    }
+
+    public static Map<String, String> getCommonParametrs() throws SQLException, ClassNotFoundException {
+        Map<String, String> commonParametrs = new HashMap<>();
+        Statement statement = getStatement();
+        ResultSet rs = statement.executeQuery(Constant.SqlQuery.GET_COMMON_PARAMETRS);
+        while (rs.next()){
+            String name = rs.getString("name");
+            String value = rs.getString("value");
+            commonParametrs.put(name, value);
+        }
+
+        return commonParametrs;
     }
 }
