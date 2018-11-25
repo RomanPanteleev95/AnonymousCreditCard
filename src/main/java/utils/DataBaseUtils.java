@@ -19,42 +19,65 @@ import java.util.Map;
 import static utils.Utils.getStatement;
 
 public class DataBaseUtils {
+
+    public static void createNewCustomer(String name, String email, String password) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.CREATE_NEW_CUSTOMER);
+        preparedStatement.setString(1,name);
+        preparedStatement.setString(2, password);
+        preparedStatement.setString(3, email);
+        preparedStatement.executeUpdate();
+    }
+
     public static Bank getBankByID(int id) throws SQLException, ClassNotFoundException {
+        Bank bank = new Bank();
         PreparedStatement bankStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_BANK_BY_ID);
         bankStatement.setInt(1, id);
         ResultSet resultSet = bankStatement.executeQuery();
-        return fillBankParametrs(resultSet);
+        if (resultSet.next()){
+            bank.setId(resultSet.getInt("id"));
+            bank.setName(resultSet.getString("name"));
+            bank.setType("type");
+        }
+
+        bank.setPrivateKey(getBanksPrivateKey(id));
+        bank.setSharedKeyWithIntermediary(getBanksKeySharedWithIntermediary(id));
+        return bank;
     }
 
     public static Bank getBankByName(String name) throws SQLException, ClassNotFoundException {
+        Bank bank = new Bank();
         PreparedStatement bankStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_BANK_BY_NAME);
         bankStatement.setString(1, name);
         ResultSet resultSet = bankStatement.executeQuery();
-        return fillBankParametrs(resultSet);
-    }
-
-    private static Bank fillBankParametrs(ResultSet resultSet) throws SQLException, ClassNotFoundException {
-        Bank bank = new Bank();
         if (resultSet.next()){
             bank.setId(resultSet.getInt("id"));
-            bank.setPrivateKey(resultSet.getString("private_key"));
-            bank.setSharedKeyWithIntermediary(resultSet.getString("shared_intermediary_key"));
             bank.setName(resultSet.getString("name"));
-            bank.setType(resultSet.getString("type"));
+            bank.setType("type");
         }
-        bank.setAlliesDoubleBlocks(getAliesDoubleBlocks(bank.getId()));
 
-      return bank;
-
+        bank.setPrivateKey(getBanksPrivateKey(bank.getId()));
+        bank.setSharedKeyWithIntermediary(getBanksKeySharedWithIntermediary(bank.getId()));
+        return bank;
     }
 
-    public static void createNewCustomer(String name, String sharedKeyFroSignIn, String email, String password) throws SQLException, ClassNotFoundException {
-        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.CREATE_NEW_CUSTOMER);
-        preparedStatement.setString(1,name);
-        preparedStatement.setString(2,sharedKeyFroSignIn);
-        preparedStatement.setString(3, password);
-        preparedStatement.setString(4, email);
-        preparedStatement.executeUpdate();
+    public static String getBanksPrivateKey(int bankId) throws SQLException, ClassNotFoundException {
+        PreparedStatement bankStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_BANKS_PRIVATE_KEY);
+        bankStatement.setInt(1, bankId);
+        ResultSet resultSet = bankStatement.executeQuery();
+        if (resultSet.next()){
+            return resultSet.getString("private_key");
+        }
+        return null;
+    }
+
+    public static String getBanksKeySharedWithIntermediary(int bankId) throws SQLException, ClassNotFoundException {
+        PreparedStatement bankStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_BANKS_KEY_SHARED_WITH_INTERMEDIARY);
+        bankStatement.setInt(1, bankId);
+        ResultSet resultSet = bankStatement.executeQuery();
+        if (resultSet.next()){
+            return resultSet.getString("shared_key_with_intermediary");
+        }
+        return null;
     }
 
     public static Customer getCustomerByEmail(String email) throws SQLException, ClassNotFoundException {
@@ -76,14 +99,11 @@ public class DataBaseUtils {
         if (resultSet.next()) {
             customer.setId(resultSet.getInt("id"));
             customer.setName(resultSet.getString("name"));
-            customer.setSharedKeyForSignIn(resultSet.getString("shared_key_for_sig_in"));
             customer.setEmail(resultSet.getString("email"));
             customer.setCustomerPassword(resultSet.getString("customer_password"));
             customer.setCreditBankId(resultSet.getInt("credit_bank_id"));
-            customer.setSecretKeySharedWithCreditCardBank(resultSet.getString("shared_key_with_credit_bank"));
             customer.setAccountIdInCreditCardBank(resultSet.getString("account_id_in_credit_bank"));
             customer.setDepositBankId(resultSet.getInt("deposit_bank_id"));
-            customer.setSecretKeySharedWithDepositBank(resultSet.getString("shared_key_with_deposit_bank"));
             customer.setAccountIdInDepositBank(resultSet.getString("account_id_in_deposit_bank"));
         }
         return customer;
@@ -99,15 +119,13 @@ public class DataBaseUtils {
         return statement.executeQuery(Constant.SqlQuery.GET_ALL_CREDIT_BANKS);
     }
 
-    public static void registrationCustomerInBank(int creditBankId, String accountIdInCreditCardCardBank, String keySharedWithCreditBank, int depositBankId, String accountIdInDepositBank, String keySharedWithDepositBank, String email) throws SQLException, ClassNotFoundException {
+    public static void registrationCustomerInBank(int creditBankId, String accountIdInCreditCardCardBank, int depositBankId, String accountIdInDepositBank, String email) throws SQLException, ClassNotFoundException {
         PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.REGISTRATION_CUSTOMER_IN_BANK);
         preparedStatement.setInt(1, creditBankId);
         preparedStatement.setString(2, accountIdInCreditCardCardBank);
-        preparedStatement.setString(3, keySharedWithCreditBank);
-        preparedStatement.setInt(4, depositBankId);
-        preparedStatement.setString(5, accountIdInDepositBank);
-        preparedStatement.setString(6, keySharedWithDepositBank);
-        preparedStatement.setString(7, email);
+        preparedStatement.setInt(3, depositBankId);
+        preparedStatement.setString(4, accountIdInDepositBank);
+        preparedStatement.setString(5, email);
         preparedStatement.executeUpdate();
     }
 
@@ -221,7 +239,6 @@ public class DataBaseUtils {
         location.setSharedKeyWithIntermediary(resultSet.getString("shared_intermediary_key"));
         location.setDepositBankId(resultSet.getInt("deposit_bank_id"));
         location.setAccountIdInDepositBank(resultSet.getString("account_id_in_deposit_bank"));
-        location.setSecretKeySharedWithDepositBank(resultSet.getString("shared_key_with_deposit_bank"));
         return location;
     }
 
@@ -265,4 +282,55 @@ public class DataBaseUtils {
 
         return commonParametrs;
     }
+
+    public static Map<String, String> getBanksPublicKeyForRsa(int bankId) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_BANKS_PUBLIC_KEY_FOR_RSA);
+        preparedStatement.setInt(1, bankId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        Map<String, String> rsaPublicKey = new HashMap<>();
+        if(resultSet.next()){
+            rsaPublicKey.put("e", resultSet.getString("e"));
+            rsaPublicKey.put("n", resultSet.getString("n"));
+        }
+
+        return rsaPublicKey;
+    }
+
+    public static Map<String, String> getBanksPrivateKeyForRsa(int bankId) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_BANKS_PRIVATE_KEY_FOR_RSA);
+        preparedStatement.setInt(1, bankId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        Map<String, String> rsaPrivateKey = new HashMap<>();
+        if(resultSet.next()){
+            rsaPrivateKey.put("d", resultSet.getString("d"));
+            rsaPrivateKey.put("n", resultSet.getString("n"));
+        }
+
+        return rsaPrivateKey;
+    }
+
+    public static void setSharedKeyWithCustomer(int bankId, int customerId, String key) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.SET_SHARED_KEY_SITH_CUSTOMER);
+        preparedStatement.setInt(1, bankId);
+        preparedStatement.setInt(2, customerId);
+        preparedStatement.setString(3, key);
+        preparedStatement.executeUpdate();
+    }
+
+    public static void setEncryptSharedKeyWithCustomer(int bankId, int customerId, String key) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.SET_ENCRYPT_SHARED_KEY_SITH_CUSTOMER);
+        preparedStatement.setInt(1, bankId);
+        preparedStatement.setInt(2, customerId);
+        preparedStatement.setString(3, key);
+        preparedStatement.executeUpdate();
+    }
+
+    public static  String getIntermediaryKeySharedWithBank(int bankId) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_INTERMEDIARY_KEY_SHARED_WITH_BANK);
+        preparedStatement.setInt(1, bankId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return resultSet.getString("banks_shared_key");
+    }
 }
+

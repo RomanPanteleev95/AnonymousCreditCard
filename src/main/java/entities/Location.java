@@ -6,7 +6,6 @@ public class Location {
     private String sharedKeyWithIntermediary;
     private int depositBankId;
     private String accountIdInDepositBank;
-    private String secretKeySharedWithDepositBank;
 
     public Location(int locationId, String locationName) {
         this.locationId = locationId;
@@ -51,13 +50,5 @@ public class Location {
 
     public void setAccountIdInDepositBank(String accountIdInDepositBank) {
         this.accountIdInDepositBank = accountIdInDepositBank;
-    }
-
-    public String getSecretKeySharedWithDepositBank() {
-        return secretKeySharedWithDepositBank;
-    }
-
-    public void setSecretKeySharedWithDepositBank(String secretKeySharedWithDepositBank) {
-        this.secretKeySharedWithDepositBank = secretKeySharedWithDepositBank;
     }
 }

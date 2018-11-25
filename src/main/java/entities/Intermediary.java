@@ -1,6 +1,7 @@
 package entities;
 
 import constants.Constant;
+import entities.banks.Bank;
 import utils.ConnectionUtils;
 import utils.DataBaseUtils;
 import utils.Utils;
@@ -24,9 +25,9 @@ public class Intermediary {
     private Intermediary() throws SQLException, ClassNotFoundException {
         Statement statement = Utils.getStatement();
         ResultSet resultSet = statement.executeQuery(Constant.SqlQuery.GET_INTEMEDIARY_PRIVATE_KEY);
-        if (resultSet.next()){
+        if (resultSet.next()) {
             privateKey = resultSet.getString("private_key");
-        }else {
+        } else {
             privateKey = UUID.randomUUID().toString().replaceAll("-", "");
             PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.CREATE_INTERMEDIARY_PRIVATE_KEY);
             preparedStatement.setString(1, privateKey);
@@ -35,29 +36,23 @@ public class Intermediary {
     }
 
     public static Intermediary getIntermediary() throws SQLException, ClassNotFoundException {
-        if (intermediary == null){
+        if (intermediary == null) {
             intermediary = new Intermediary();
         }
         return intermediary;
-    }
-
-    public void addBanksSharedKey(String bankName, String sharedKey){
-        banksSharedKey.put(bankName, sharedKey);
     }
 
     public String getPrivateKey() {
         return privateKey;
     }
 
-    public String getBankSharedKey(String banckName){
-        return banksSharedKey.get(banckName);
+    public String getBankSharedKey(String bankName) throws SQLException, ClassNotFoundException {
+        Bank bank = DataBaseUtils.getBankByName(bankName);
+        return DataBaseUtils.getIntermediaryKeySharedWithBank(bank.getId());
     }
 
-    public String getLocationSharedKey(int locationId){
+    public String getLocationSharedKey(int locationId) {
         return locationSharedKey.get(locationId);
     }
-
-    public void addLocationSharedKey(int locationId, String sharedKey){
-        locationSharedKey.put(locationId, sharedKey);
-    }
 }
+

@@ -65,6 +65,7 @@ public class CustomerToBankProtocol {
         innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getSharedKeyWithIntermediary()));
         innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getPrivateKey()));
 
+        //TODO: get sharedKey from BANK DB
         message.setBody(Utils.decryptString(message.getBody(), customer.getSecretKeySharedWithDepositBank()));
 
         float money = Float.parseFloat(message.getBody());

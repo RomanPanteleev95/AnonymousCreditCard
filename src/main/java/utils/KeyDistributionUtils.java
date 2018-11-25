@@ -38,7 +38,6 @@ public class KeyDistributionUtils {
         BigInteger customerPublicKey = A.modPow(new BigInteger(customerPrivateKey), P);
         BigInteger banksPublickKey = A.modPow(serverPrivateKey, P);
 
-        BigInteger sharedKeyForCustomer = banksPublickKey.modPow(new BigInteger(customerPrivateKey), P);
         BigInteger sharedKeyForServer = customerPublicKey.modPow(serverPrivateKey, P);
 
         sharedKeys.put("customer", banksPublickKey.toString());
