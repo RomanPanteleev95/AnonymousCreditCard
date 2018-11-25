@@ -13,7 +13,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import utils.KeyDistributionUtils;
 import utils.MailNotification;
 import utils.Utils;
 import validators.ValidatorsUtils;
@@ -25,10 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Main extends Application {
 
@@ -36,7 +32,6 @@ public class Main extends Application {
     Scene menuScene;
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        Utils.startRefill();
         launch(args);
     }
 
@@ -87,9 +82,11 @@ public class Main extends Application {
     public Scene registrationScene(Stage registrationWindow){
         Label nameLabel = new Label(Constant.UiText.NAME);
         TextField nameInput = new TextField();
+        nameInput.setPromptText("Введите Ваше имя");
 
         Label emailLabel = new Label(Constant.UiText.EMAIL);
         TextField emailInput = new TextField();
+        emailInput.setPromptText("Введите Ваш e-mail");
 
         Button registrationButton = new Button(Constant.UiText.SIGN_UP);
         registrationButton.setOnAction(event -> {
@@ -130,9 +127,11 @@ public class Main extends Application {
     public Scene signIn(Stage currentWindow){
         Label nameLabel = new Label(Constant.UiText.EMAIL);
         TextField emailInput = new TextField();
+        emailInput.setPromptText("Ваш e-mail");
 
         Label passwordLabel = new Label(Constant.UiText.PASSWORD);
-        TextField passwordInput = new TextField();
+        PasswordField passwordInput = new PasswordField();
+        passwordInput.setPromptText("Ваш пароль");
 
         Button signInButton = new Button(Constant.UiText.SIGN_IN);
         signInButton.setOnAction(event -> {
@@ -259,7 +258,7 @@ public class Main extends Application {
         Button menuButton = new Button(Constant.UiText.MENU);
 
         Label nameLabel = new Label("Придумайте код для совершения операций (6 символов)");
-        TextField codeInput = new TextField();
+        PasswordField codeInput = new PasswordField();
 
         registrationButton.setOnAction(event -> {
             try {
@@ -295,7 +294,7 @@ public class Main extends Application {
         StackPane.setMargin(depositBankChoiceBox, new Insets(100, 50, 330, 50));
         StackPane.setMargin(creditLabel, new Insets(120, 50, 310, 50));
         StackPane.setMargin(creditBankChoiceBox, new Insets(150, 50, 280, 50));
-        StackPane.setMargin(nameLabel, new Insets(180, 50, 210, 50));
+        StackPane.setMargin(nameLabel, new Insets(180, 0, 250, 0));
         StackPane.setMargin(codeInput, new Insets(200, 50, 230, 50));
         StackPane.setMargin(registrationButton, new Insets(250, 50, 180, 50));
         StackPane.setMargin(menuButton, new Insets(350, 0, 80, 0));
@@ -305,7 +304,7 @@ public class Main extends Application {
 
     public Scene customerOperations(Customer customer) throws SQLException, ClassNotFoundException {
 
-        Label sum = new Label("Сумма");
+        Label sum = new Label("Сумма (руб.)");
         TextField moneyInput = new TextField();
         Button takeCreditButton = new Button("Пополнить");
         Button menuButton = new Button("Меню");
@@ -346,7 +345,7 @@ public class Main extends Application {
     }
 
     public Scene payFroPurchaseScene(Customer customer) throws SQLException, ClassNotFoundException {
-        Label sum = new Label("Сумма покупки");
+        Label sum = new Label("Сумма покупки (руб.)");
         TextField moneyInput = new TextField();
         Button payButton = new Button("Оплатить");
         Button menuButton = new Button("Меню");
@@ -355,6 +354,9 @@ public class Main extends Application {
         for (Location location : locations){
             locationChoiceBox.getItems().addAll(location.getLocationName());
         }
+
+        Label nameLabel = new Label("Введите код для совершения операций (6 символов)");
+        PasswordField codeInput = new PasswordField();
 
         payButton.setOnAction(event -> {
             String message = moneyInput.getText();
@@ -371,7 +373,7 @@ public class Main extends Application {
                             Bank depositBank = DataBaseUtils.getBankByID(customer.getDepositBankId());
                             Location currentLocation = DataBaseUtils.getLocationByName(locationChoiceBox.getValue());
                             CustomerToBankProtocol customerToBankProtocol = new CustomerToBankProtocol(currentLocation, depositBank, customer, new Message(message));
-                            customerToBankProtocol.runProtocol();
+                            customerToBankProtocol.runProtocol(codeInput.getText());
                             DoubleBlock locationDoubleBlock = DataBaseUtils.getLocationDoubleBlockByBankId(currentLocation.getLocationId(), currentLocation.getDepositBankId());
                             BankToBankProtocol bankToBankProtocol = new BankToBankProtocol(depositBank, locationDoubleBlock, new Message(message));
                             bankToBankProtocol.runProtocol();
@@ -381,7 +383,9 @@ public class Main extends Application {
                 }
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
-            }
+            } catch (NumberFormatException e){
+                    errorStagePK();
+                }
         });
 
         menuButton.setOnAction(event -> {
@@ -393,11 +397,13 @@ public class Main extends Application {
         });
 
         StackPane layout2 = new StackPane();
-        layout2.getChildren().addAll(locationChoiceBox, sum, moneyInput, payButton, menuButton);
+        layout2.getChildren().addAll(locationChoiceBox, sum, moneyInput, nameLabel, codeInput, payButton, menuButton);
 
         StackPane.setMargin(locationChoiceBox, new Insets(50, 50, 380, 50));
         StackPane.setMargin(sum, new Insets(80, 50, 350, 50));
         StackPane.setMargin(moneyInput, new Insets(110, 50, 320, 50));
+        StackPane.setMargin(nameLabel, new Insets(140, 0, 290, 0));
+        StackPane.setMargin(codeInput, new Insets(160, 50, 270, 50));
         StackPane.setMargin(payButton, new Insets(270, 0, 160, 0));
         StackPane.setMargin(menuButton, new Insets(270, 10, 160, 180));
         return new Scene(layout2, 300, 450);
@@ -543,6 +549,21 @@ public class Main extends Application {
         errorWindow.show();
     }
 
+    public void errorStagePK(){
+        Stage errorWindow = new Stage();
+        Label errorLable = new Label("Неправильно введенный код");
+        Button setDepositBankNameButton = new Button("OK");
 
+        setDepositBankNameButton.setOnAction(event1 -> {
+            errorWindow.close();
+        });
 
+        StackPane errorStackPane = new StackPane();
+        errorStackPane.getChildren().addAll(errorLable, setDepositBankNameButton);
+        StackPane.setMargin(errorLable, new Insets(5, 10, 90, 10));
+        StackPane.setMargin(setDepositBankNameButton, new Insets(45, 20, 45, 20));
+        errorWindow.setScene(new Scene(errorStackPane, 300, 100));
+        errorWindow.show();
+
+    }
 }

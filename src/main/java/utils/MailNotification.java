@@ -18,21 +18,6 @@ public class MailNotification {
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
         message.setSubject("Password");
         message.setText("Ваш пароль для личного кабинета: " + messagePassword);
-//
-//        PrintWriter printWriter = new PrintWriter("password.txt");
-//        printWriter.write(messagePassword);
-//        printWriter.close();
-
-//        MimeBodyPart messageBodyPart = new MimeBodyPart();
-//        Multipart multipart = new MimeMultipart();
-//        String file = "password.txt";
-//        String fileName = "password.txt";
-//        DataSource source = new FileDataSource(file);
-//        messageBodyPart.setDataHandler(new DataHandler(source));
-//        messageBodyPart.setFileName(fileName);
-//        multipart.addBodyPart(messageBodyPart);
-//        message.setContent(multipart);
-
 
         Transport tr = mailSession.getTransport();
         tr.connect("anoncreditcard@gmail.com", "Gthtcnhjqrf32");

@@ -15,16 +15,8 @@ public class DoubleBlock{
         return bankName;
     }
 
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
-    }
-
     public InnerBlock getInnerBlock() {
         return innerBlock;
-    }
-
-    public void setInnerBlock(InnerBlock innerBlock) {
-        this.innerBlock = innerBlock;
     }
 
     @Override

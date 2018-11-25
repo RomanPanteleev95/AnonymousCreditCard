@@ -95,26 +95,6 @@ public class Utils {
         DataBaseUtils.setSharedKeyWithCustomer(bankId, customerId, sharedKey);
     }
 
-    public static void startRefill() throws ClassNotFoundException, SQLException {
-        Intermediary intermediary = Intermediary.getIntermediary();
-        Statement statement = getStatement();
-
-//
-//        rs = statement.executeQuery(Constant.SqlQuery.GET_ALL_LOCATIONS);
-//        while (rs.next()){
-//            int locationId = rs.getInt("id");
-//            String sharedKeyWirhIntemediary = rs.getString("shared_intermediary_key");
-//            intermediary.addLocationSharedKey(locationId, sharedKeyWirhIntemediary);
-//        }
-    }
-
-    public static void registrationLocation(Location location) throws SQLException, ClassNotFoundException {
-        location.setLocationName("locationId");
-        String sharedKeyLocationWithIntermediary = "sharedKeyLocationWithIntermediary";
-        Intermediary intermediary = Intermediary.getIntermediary();
-        location.setSharedKeyWithIntermediary(sharedKeyLocationWithIntermediary);
-    }
-
     public static DoubleBlock encryptDoubleBlock(DoubleBlock doubleBlock, String key){
         String encryptionBankIdFromDoubleBlock = Utils.encryptString(doubleBlock.getBankName(), key);
         InnerBlock innerBlock = doubleBlock.getInnerBlock();

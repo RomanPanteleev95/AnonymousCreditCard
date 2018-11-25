@@ -3,20 +3,12 @@ package entities;
 public class Customer {
     private int id;
     private String name;
-    private String shared_key_for_sig_in;
     private String customerPassword;
     private int creditBankId;
     private String accountIdInCreditCardBank;
-    private String secretKeySharedWithCreditCardBank;
     private int depositBankId;
     private String accountIdInDepositBank;
-    private String secretKeySharedWithDepositBank;
     private String email;
-
-    public Customer(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     public Customer(){
 
@@ -38,14 +30,6 @@ public class Customer {
         this.name = name;
     }
 
-    public String getSharedKeyForSignIn() {
-        return shared_key_for_sig_in;
-    }
-
-    public void setSharedKeyForSignIn(String privateKey) {
-        this.shared_key_for_sig_in = privateKey;
-    }
-
     public String getCustomerPassword() {
         return customerPassword;
     }
@@ -62,20 +46,8 @@ public class Customer {
         this.creditBankId = creditBankId;
     }
 
-    public String getAccountIdInCreditCardBank() {
-        return accountIdInCreditCardBank;
-    }
-
     public void setAccountIdInCreditCardBank(String accountIdInCreditCardBank) {
         this.accountIdInCreditCardBank = accountIdInCreditCardBank;
-    }
-
-    public String getSecretKeySharedWithCreditCardBank() {
-        return secretKeySharedWithCreditCardBank;
-    }
-
-    public void setSecretKeySharedWithCreditCardBank(String secretKeySharedWithCreditCardBank) {
-        this.secretKeySharedWithCreditCardBank = secretKeySharedWithCreditCardBank;
     }
 
     public int getDepositBankId() {
@@ -86,20 +58,8 @@ public class Customer {
         this.depositBankId = depositBankId;
     }
 
-    public String getAccountIdInDepositBank() {
-        return accountIdInDepositBank;
-    }
-
     public void setAccountIdInDepositBank(String accountIdInDepositBank) {
         this.accountIdInDepositBank = accountIdInDepositBank;
-    }
-
-    public String getSecretKeySharedWithDepositBank() {
-        return secretKeySharedWithDepositBank;
-    }
-
-    public void setSecretKeySharedWithDepositBank(String secretKeySharedWithDepositBank) {
-        this.secretKeySharedWithDepositBank = secretKeySharedWithDepositBank;
     }
 
     public String getEmail() {

@@ -37,39 +37,43 @@ public class CustomerToBankProtocol {
         this.message = message;
     }
 
-    public void runProtocol() throws SQLException, ClassNotFoundException {
-        //customer encrypt message $
-        message.setBody(Utils.encryptString(message.getBody(), customer.getSecretKeySharedWithDepositBank()));
+    public void runProtocol(String sharedKey) throws SQLException, ClassNotFoundException {
+        try {
+            //customer encrypt message $
+            message.setBody(Utils.encryptString(message.getBody(), sharedKey));
 
-        //market encrypt DB + message
-        DoubleBlock depositBankDoubleBlock = DataBaseUtils.getCustomerDoubleBlockByBankId(customer.getId(), depositBank.getId());
-        DoubleBlock encryptionDoubleBlock = Utils.encryptDoubleBlock(depositBankDoubleBlock, location.getSharedKeyWithIntermediary());
-        message.setBody(Utils.encryptString(message.getBody(), location.getSharedKeyWithIntermediary()));
+            //market encrypt DB + message
+            DoubleBlock depositBankDoubleBlock = DataBaseUtils.getCustomerDoubleBlockByBankId(customer.getId(), depositBank.getId());
+            DoubleBlock encryptionDoubleBlock = Utils.encryptDoubleBlock(depositBankDoubleBlock, location.getSharedKeyWithIntermediary());
+            message.setBody(Utils.encryptString(message.getBody(), location.getSharedKeyWithIntermediary()));
 
-        //intermed decrypt DB + message
-        String sharedKeyWithLocation = INTERMEDIARY.getLocationSharedKey(location.getLocationId());
-        message.setBody(Utils.decryptString(message.getBody(), sharedKeyWithLocation));
-        DoubleBlock decriptionDoubleBlock = Utils.decryptDoubleBlock(encryptionDoubleBlock, sharedKeyWithLocation);
+            //intermed decrypt DB + message
+            String sharedKeyWithLocation = INTERMEDIARY.getLocationSharedKey(location.getLocationId());
+            message.setBody(Utils.decryptString(message.getBody(), sharedKeyWithLocation));
+            DoubleBlock decriptionDoubleBlock = Utils.decryptDoubleBlock(encryptionDoubleBlock, sharedKeyWithLocation);
 
-        //intermed decrypt DB
-        String decriptionBankId = Utils.decryptString(decriptionDoubleBlock.getBankName(), INTERMEDIARY.getPrivateKey());
-        InnerBlock innerBlock = decriptionDoubleBlock.getInnerBlock();
-        innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), INTERMEDIARY.getPrivateKey()));
+            //intermed decrypt DB
+            String decriptionBankId = Utils.decryptString(decriptionDoubleBlock.getBankName(), INTERMEDIARY.getPrivateKey());
+            InnerBlock innerBlock = decriptionDoubleBlock.getInnerBlock();
+            innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), INTERMEDIARY.getPrivateKey()));
 
-        String sharedKeyWithDepositBank = INTERMEDIARY.getBankSharedKey(decriptionBankId);
-        message.setBody(Utils.encryptString(message.getBody(), sharedKeyWithDepositBank));
-        innerBlock.setInformation(Utils.encryptString(innerBlock.getInformation(), sharedKeyWithDepositBank));
+            String sharedKeyWithDepositBank = INTERMEDIARY.getBankSharedKey(decriptionBankId);
+            message.setBody(Utils.encryptString(message.getBody(), sharedKeyWithDepositBank));
+            innerBlock.setInformation(Utils.encryptString(innerBlock.getInformation(), sharedKeyWithDepositBank));
 
 //        deposit bank decryptMes
-        message.setBody(Utils.decryptString(message.getBody(), depositBank.getSharedKeyWithIntermediary()));
-        innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getSharedKeyWithIntermediary()));
-        innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getPrivateKey()));
+            message.setBody(Utils.decryptString(message.getBody(), depositBank.getSharedKeyWithIntermediary()));
+            innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getSharedKeyWithIntermediary()));
+            innerBlock.setInformation(Utils.decryptString(innerBlock.getInformation(), depositBank.getPrivateKey()));
 
-        //TODO: get sharedKey from BANK DB
-        message.setBody(Utils.decryptString(message.getBody(), customer.getSecretKeySharedWithDepositBank()));
+            //TODO: get sharedKey from BANK DB
+            message.setBody(Utils.decryptString(message.getBody(), DataBaseUtils.getBankKeySharedWithCustomer(depositBank.getId(), customer.getId())));
 
-        float money = Float.parseFloat(message.getBody());
-        DataBaseUtils.removeMoneyFromCustomerAccount(innerBlock.getInformation(), money);
+            float money = Float.parseFloat(message.getBody());
+            DataBaseUtils.removeMoneyFromCustomerAccount(innerBlock.getInformation(), money);
+        }catch (NumberFormatException e){
+            throw new NumberFormatException();
+        }
     }
 
 }

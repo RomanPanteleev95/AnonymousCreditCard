@@ -17,8 +17,6 @@ import java.util.UUID;
 
 public class Intermediary {
     private String privateKey;
-    private Map<String, String> banksSharedKey = new HashMap<>(); //name банка -> общий ключ с банком
-    private Map<Integer, String> locationSharedKey = new HashMap<>();
 
     private static Intermediary intermediary;
 
@@ -51,8 +49,9 @@ public class Intermediary {
         return DataBaseUtils.getIntermediaryKeySharedWithBank(bank.getId());
     }
 
-    public String getLocationSharedKey(int locationId) {
-        return locationSharedKey.get(locationId);
+    public String getLocationSharedKey(int locationId) throws SQLException, ClassNotFoundException {
+        return DataBaseUtils.getIntermediaryKeySharedWithLocation(locationId);
     }
+
 }
 

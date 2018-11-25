@@ -11,21 +11,6 @@ public class Bank {
     protected String type;
     protected String privateKey;
     protected String sharedKeyWithIntermediary;
-    protected Map<String, String> sharedCustomerKey = new HashMap<>();
-    protected Map<Integer, DoubleBlock> alliesDoubleBlocks = new HashMap<>();
-
-    public Map<Integer, DoubleBlock> getAlliesDoubleBlocks() {
-        return alliesDoubleBlocks;
-    }
-
-    public void setAlliesDoubleBlocks(Map<Integer, DoubleBlock> alliesDoubleBlocks) {
-        this.alliesDoubleBlocks = alliesDoubleBlocks;
-    }
-
-    public Bank(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     public Bank(){
 
@@ -47,10 +32,6 @@ public class Bank {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
-    }
-
     public void setType(String type) {
         this.type = type;
     }
@@ -69,13 +50,5 @@ public class Bank {
 
     public void setSharedKeyWithIntermediary(String sharedKeyWithIntermediary) {
         this.sharedKeyWithIntermediary = sharedKeyWithIntermediary;
-    }
-
-    public Map<String, String> getSharedCustomerKey() {
-        return sharedCustomerKey;
-    }
-
-    public void setSharedCustomerKey(Map<String, String> sharedCustomerKey) {
-        this.sharedCustomerKey = sharedCustomerKey;
     }
 }

@@ -138,25 +138,6 @@ public class DataBaseUtils {
         preparedStatement.executeUpdate();
     }
 
-    public static Map<Integer, DoubleBlock> getAliesDoubleBlocks(int bank_id) throws SQLException, ClassNotFoundException {
-        Map<Integer, DoubleBlock> resultMap = new HashMap<>();
-        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_ALIES_DOUBLE_BLOCKS);
-        preparedStatement.setInt(1, bank_id);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        if (resultSet == null || !resultSet.next()){
-            return resultMap;
-        }
-
-        while (resultSet.next()){
-            int customerId = resultSet.getInt("customer_id");
-            InnerBlock innerBlock = new InnerBlock(resultSet.getString("innner_box"));
-            DoubleBlock doubleBlock = new DoubleBlock(resultSet.getString("encode_bank_name"), innerBlock);
-            resultMap.put(customerId, doubleBlock);
-        }
-
-        return resultMap;
-    }
-
     public static void addAlliesDoubleBox(int bankId, int doubleBlockId) throws SQLException, ClassNotFoundException {
         PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.ADD_ALIES_DOUBLE_BLOCK);
         preparedStatement.setInt(1, bankId);
@@ -236,7 +217,6 @@ public class DataBaseUtils {
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
         Location location = new Location(resultSet.getInt("id"), resultSet.getString("name"));
-        location.setSharedKeyWithIntermediary(resultSet.getString("shared_intermediary_key"));
         location.setDepositBankId(resultSet.getInt("deposit_bank_id"));
         location.setAccountIdInDepositBank(resultSet.getString("account_id_in_deposit_bank"));
         return location;
@@ -318,7 +298,7 @@ public class DataBaseUtils {
     }
 
     public static void setEncryptSharedKeyWithCustomer(int bankId, int customerId, String key) throws SQLException, ClassNotFoundException {
-        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.SET_ENCRYPT_SHARED_KEY_SITH_CUSTOMER);
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.SET_ENCRYPT_SHARED_KEY_WITH_CUSTOMER);
         preparedStatement.setInt(1, bankId);
         preparedStatement.setInt(2, customerId);
         preparedStatement.setString(3, key);
@@ -331,6 +311,34 @@ public class DataBaseUtils {
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
         return resultSet.getString("banks_shared_key");
+    }
+
+    public static String getIntermediaryKeySharedWithLocation(int locationID) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_INTERMEDIARY_KEY_SHARED_WITH_LOCATION);
+        preparedStatement.setInt(1, locationID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return resultSet.getString("locations_shared_key");
+    }
+
+    public static String getLocationKeySharedWithIntermediary(int locationID) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_LOCATION_KEY_SHARED_WITH_NTERMEDIARY);
+        preparedStatement.setInt(1, locationID);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return resultSet.getString("shared_key_with_intermediary");
+    }
+
+    public static String getBankKeySharedWithCustomer(int bankId, int customerId) throws SQLException, ClassNotFoundException {
+        PreparedStatement preparedStatement = Utils.getPreparedStatement(Constant.SqlQuery.GET_SHARED_KEY_WITH_CUSTOMER);
+        preparedStatement.setInt(1, bankId);
+        preparedStatement.setInt(2, customerId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet.next()){
+            return resultSet.getString("shared_key");
+        }
+
+        return null;
     }
 }
 
